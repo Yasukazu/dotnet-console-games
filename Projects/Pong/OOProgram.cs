@@ -14,22 +14,27 @@ var clargs = Environment.GetCommandLineArgs();
 var pArgs = clargs[1..];
 var parseResult = Parser.Parse<Options>(pArgs);
 var speed_ratio = 1;
-var screen_width = 72;
-var screen_height = 24;
-var paddle_width = 8;
-var refresh_delay = 200;
+var screen_width = 48;
+var screen_height = 16;
+var paddle_width = 4;
+var refresh_delay = 150;
+var oppo_delay = 180;
 if (parseResult.Tag == ParserResultType.Parsed){
-	speed_ratio = parseResult.Value.speed;
-	screen_width = parseResult.Value.width;
-	screen_height = parseResult.Value.height;
-	paddle_width = parseResult.Value.paddle;
+	if(parseResult.Value.speed > 0)
+		speed_ratio = parseResult.Value.speed;
+	if(parseResult.Value.width > 0)
+		screen_width = parseResult.Value.width;
+	if(parseResult.Value.height > 0)
+		screen_height = parseResult.Value.height;
+	if(parseResult.Value.paddle > 0)
+		paddle_width = parseResult.Value.paddle;
 	rotation = parseResult.Value.rotation ? Rotation.Vertical : Rotation.Horizontal;
 	if(parseResult.Value.delay > 0)
 		refresh_delay = parseResult.Value.delay;
 
 }
 var (screen_w, screen_h) = OnScreen.init(screen_width, screen_height);
-var game = new Game(speed_ratio, screen_w, screen_h, paddle_width, rotation, refresh_delay);
+var game = new Game(speed_ratio, screen_w, screen_h, paddle_width, rotation, refresh_delay, oppo_delay);
 game.Run();
 public class Game {
 	// public Ball ball;
@@ -42,8 +47,8 @@ public class Game {
 	public Rotation rotation {get; init;}
 	TimeSpan delay;
 	Stopwatch opponentStopwatch = new();
-	TimeSpan opponentInputDelay = TimeSpan.FromMilliseconds(100);
-	public Game(int speed_ratio, int screen_w, int screen_h, int paddleWidth, Rotation rot, int refresh_delay){
+	TimeSpan opponentInputDelay; // = TimeSpan.FromMilliseconds(100);
+	public Game(int speed_ratio, int screen_w, int screen_h, int paddleWidth, Rotation rot, int refresh_delay, int opponent_dealy){
 		screen = new(screen_w, screen_h, rot == Rotation.Vertical ? true : false);
 		selfPadl = new(range: screen.PaddleRange, width: paddleWidth, manipDict);
 		oppoPadl = new(range: screen.PaddleRange, width: paddleWidth);
@@ -57,6 +62,7 @@ public class Game {
 			manipDict[ConsoleKey.RightArrow] = ()=>{ return selfPadl.Shift(1); };
 		}
 	delay = TimeSpan.FromMilliseconds(refresh_delay);
+		opponentInputDelay = TimeSpan.FromMilliseconds(opponent_dealy);
 	// pdl = new VPaddle(screen.w, paddle_width); // NestedRange(0..(width / 3), 0..width);
 	Console.CancelKeyPress += delegate {
 		Console.CursorVisible = true;
@@ -104,7 +110,7 @@ public class Game {
 				goto exit;
 			}
 		}
-		else if (offsets.y == screen.HomeToAway - 2){
+		else if (offsets.y == screen.HomeToAway - 1){
 			var PadlStart = oppoPadl.Offset.Value; 
 			var PadlEnd = PadlStart + oppoPadl.Width;
 			if(!(PadlStart..PadlEnd).Contains(offsets.x)) {
@@ -116,9 +122,9 @@ public class Game {
 
 		}
 		if(opponentStopwatch.Elapsed > opponentInputDelay){
-			var diff = screen.Ball.offsets.x - oppoPadl.Offset.Value;
-			if (Math.Abs(diff) > 2){
-				oppoPadl.Shift(diff);
+			var diff = screen.Ball.offsets.x - (oppoPadl.Offset.Value + oppoPadl.Width / 2);
+			if (Math.Abs(diff) > 0){
+				oppoPadl.Shift(diff < 0 ? -1 : 1);
 				screen.draw(oppoPadl);
 			}
 			opponentStopwatch.Restart();
