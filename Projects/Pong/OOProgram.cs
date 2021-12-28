@@ -14,11 +14,11 @@ var clargs = Environment.GetCommandLineArgs();
 var pArgs = clargs[1..];
 var parseResult = Parser.Parse<Options>(pArgs);
 var speed_ratio = 1;
-var screen_width = 48;
-var screen_height = 16;
-var paddle_width = 4;
+var screen_width = 32;
+var screen_height = 12;
+var paddle_width = 2;
 var refresh_delay = 150;
-var oppo_delay = 180;
+var oppo_delay = 300;
 if (parseResult.Tag == ParserResultType.Parsed){
 	if(parseResult.Value.speed > 0)
 		speed_ratio = parseResult.Value.speed;
@@ -99,28 +99,34 @@ public class Game {
 			while(Console.KeyAvailable) // clear over input
 				Console.ReadKey(true);
 		}
-		var offsets = screen.drawBall(); // screen.Ball.Move();
-		if(offsets.y == 1){
-			var selfPadlStart = selfPadl.Offset.Value; 
-			var selfPadlEnd = selfPadlStart + selfPadl.Width;
-			if(!(selfPadlStart..selfPadlEnd).Contains(offsets.x)) {
-				screen.SetCursorPosition(0, 0);
-				Console.Write("Your paddle failed to hit the ball!: Hit any key..");
-				Console.ReadKey();
-				goto exit;
-			}
-		}
-		else if (offsets.y == screen.HomeToAway - 1){
-			var PadlStart = oppoPadl.Offset.Value; 
-			var PadlEnd = PadlStart + oppoPadl.Width;
-			if(!(PadlStart..PadlEnd).Contains(offsets.x)) {
-				screen.SetCursorPosition(0, 0);
-				Console.Write("Opponent's paddle failed to hit the ball!: Hit any key..");
-				Console.ReadKey();
-				goto exit;
-			}
-
-		}
+		var isBallMoved = screen.drawBall(); // screen.Ball.Move();
+            if (isBallMoved)
+            { var offsets = screen.Ball.offsets;
+                if (offsets.y == 1)
+                {
+                    var selfPadlStart = selfPadl.Offset.Value;
+                    var selfPadlEnd = selfPadlStart + selfPadl.Width;
+                    if (!(selfPadlStart..selfPadlEnd).Contains(offsets.x))
+                    {
+                        screen.SetCursorPosition(0, 0);
+                        Console.Write("Your paddle failed to hit the ball!: Hit any key..");
+                        Console.ReadKey();
+                        goto exit;
+                    }
+                }
+                else if (offsets.y >= screen.HomeToAway - 1)
+                {
+                    var PadlStart = oppoPadl.Offset.Value;
+                    var PadlEnd = PadlStart + oppoPadl.Width;
+                    if (!(PadlStart..PadlEnd).Contains(offsets.x))
+                    {
+                        screen.SetCursorPosition(0, 0);
+                        Console.Write("Opponent's paddle failed to hit the ball!: Hit any key..");
+                        Console.ReadKey();
+                        goto exit;
+                    }
+                }
+            }
 		if(opponentStopwatch.Elapsed > opponentInputDelay){
 			var diff = screen.Ball.offsets.x - (oppoPadl.Offset.Value + oppoPadl.Width / 2);
 			if (Math.Abs(diff) > 0){

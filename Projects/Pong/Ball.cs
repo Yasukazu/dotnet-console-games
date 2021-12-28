@@ -7,8 +7,8 @@ public record Offsets(int x, int y);
 public class Ball // : ScreenDrawItem
 {
 	public char DispChar {get{return 'O';}}
-	float X;
-	float Y;
+	public float X {get; private set;}
+	public float Y {get; private set;}
 	float dX;
 	float dY;
 	public Offsets offsets {get {
@@ -35,11 +35,11 @@ public class Ball // : ScreenDrawItem
 		//(X, Y) = (x, y);
 		(dX, dY) = (dx, dy);
 	}
-		XOffset = new Slider(0..(x_range.End.Value - 2), (int)x);
-		YOffset = new Slider(0..(y_range.End.Value - 2), (int)y);
+		XOffset = new Slider(0..(x_range.End.Value - 1), (int)x);
+		YOffset = new Slider(0..(y_range.End.Value - 1), (int)y);
 	}
 
-	public Offsets Move() {
+	public bool Move() {
 		if (XOffset.Value == 0 && dX < 0f ||
 			XOffset.Value == XOffset.Max && dX > 0f)
 			dX = -dX;
@@ -48,9 +48,10 @@ public class Ball // : ScreenDrawItem
 			dY = -dY;
 		X += dX;
 		Y += dY;
+		var old_offsets = new Offsets(XOffset.Value, YOffset.Value);
 		XOffset.set((int)X);
 		YOffset.set((int)Y);
-		return offsets;
+		return (new Offsets(XOffset.Value, YOffset.Value)) != old_offsets;
 	}
 	/* public BitArray GetImage(){
 		BitArray buff = new BitArray(XOffset.Max + 1);

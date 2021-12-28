@@ -43,16 +43,17 @@ public class PaddleScreen : Screen {
 		if(replace_buffer)
 			Lines[n] = image;
 	}
-	public Offsets drawBall() {
+	public bool drawBall() {
 		var offsets = Ball.offsets;
-		var new_offsets = Ball.Move();
-		if (new_offsets != offsets) {
+		if (Ball.Move()){
+			var new_offsets = Ball.offsets;
 			SetCursorPosition(offsets.x, offsets.y);
 			Console.Write((char)CharCode.SPC);
 			SetCursorPosition(new_offsets.x, new_offsets.y);
 			Console.Write(Ball.DispChar);
+			return true;
 		}
-		return new_offsets;
+		return false;
 	}
 	public void drawWalls() {
 		char c = isRotated ? '-' : '|';
