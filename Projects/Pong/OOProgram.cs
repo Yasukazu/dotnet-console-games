@@ -31,6 +31,8 @@ if (parseResult.Tag == ParserResultType.Parsed){
 	rotation = parseResult.Value.rotation ? Rotation.Vertical : Rotation.Horizontal;
 	if(parseResult.Value.delay > 0)
 		refresh_delay = parseResult.Value.delay;
+	if(parseResult.Value.oppo_delay > 0)
+		oppo_delay = parseResult.Value.oppo_delay;
 
 }
 var (screen_w, screen_h) = OnScreen.init(screen_width, screen_height);
@@ -160,6 +162,8 @@ class Options {
 	public int paddle {get; set;}
 	[Option('d', "delay", Required =false, HelpText = "ball refresh rate. default 200")]
 	public int delay {get; set;}
+	[Option('o', "opponent delay", Required =false, HelpText = "opponent delay rate. default 200")]
+	public int oppo_delay {get; set;}
 }
 
 public class GonsoleTraceListener : ConsoleTraceListener {
