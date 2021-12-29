@@ -20,6 +20,16 @@ public class PaddleScreen : Screen {
 	SideWall[] SideWalls = new SideWall[2];
 	record SideWall(WallSide Side, Wall wall);
 	// public Paddle[] Paddles = new Paddle[2]; // 0: self, 1: opponent
+	/// <summary>
+	/// Ball travel spec.
+	/// </summary>
+	/// <value>(x, y)</value>
+	public Range[] BallRanges {get{
+		//var rr = new Range[2];
+		//rr[0] = (1..SideToSide);
+		//rr[1] = (1..HomeToAway);
+		return new Range[] {1..SideToSide, 1..HomeToAway};
+	}}
 	public Ball Ball;
 	public Paddle[] Paddles = new Paddle[2];
 	List<ScreenDrawItem> DrawItems = new();
@@ -29,7 +39,7 @@ public class PaddleScreen : Screen {
 		// WallLocations = {0, EndOfLines - 1};
 		SideWalls[0] = new SideWall(WallSide.Left, new Wall(1..EndOfLines));
 		SideWalls[1] = new SideWall(WallSide.Right, new Wall(1..EndOfLines));
-		Ball = new(0..SideToSide, 0..HomeToAway, rotate);
+		// Ball = new(0..SideToSide, 0..HomeToAway, rotate);
 	}
 	public void draw(Paddle padl, bool replace_buffer = true) {
 		var side = padl.Side;
