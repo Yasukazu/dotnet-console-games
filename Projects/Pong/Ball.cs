@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 public record Offsets(int x, int y);
-public enum StartFrom {Min, Center, Max}
 public class Ball // : ScreenDrawItem
 {
 	public char DispChar {get{return 'O';}}
@@ -22,24 +21,28 @@ public class Ball // : ScreenDrawItem
 	float randomFloat = (float)random.NextDouble() * 2f;
 	float dx = Math.Max(randomFloat, 1f - randomFloat);
 	float dy = 1f - dx;
-	X = start_from switch {
+	/* X = start_from switch {
 		StartFrom.Min => x_range.Start.Value,
 		StartFrom.Center => (x_range.Start.Value + x_range.End.Value) / 2f,
 		StartFrom.Max => x_range.End.Value - 1};
 	Y = start_from switch {
 		StartFrom.Min => y_range.Start.Value,
 		StartFrom.Center => (y_range.Start.Value + y_range.End.Value) / 2f,
-		StartFrom.Max => y_range.End.Value - 1};
+		StartFrom.Max => y_range.End.Value - 1}; */
 	// if (random.Next(2) == 0) dx = -dx;
 	// if (random.Next(2) == 0) dy = -dy;
 	if (rotate) {
 		(dY, dX) = (dx, dy);
+		XOffset = new Slider(y_range);
+		YOffset = new Slider(x_range);
 	}
 	else {
 		(dX, dY) = (dx, dy);
+		XOffset = new Slider(x_range);
+		YOffset = new Slider(y_range);
 	}
-		XOffset = new Slider(x_range, (int)X); // 1 : thickness of paddle
-		YOffset = new Slider(y_range, (int)Y);
+		X = XOffset.Value;
+		Y = YOffset.Value;
 	}
 
 
@@ -57,8 +60,8 @@ public class Ball // : ScreenDrawItem
 		X += dX;
 		Y += dY;
 		var old_offsets = new Offsets(XOffset.Value, YOffset.Value);
-		XOffset.set((int)X);
-		YOffset.set((int)Y);
+		XOffset.Set((int)X);
+		YOffset.Set((int)Y);
 		return (new Offsets(XOffset.Value, YOffset.Value)) != old_offsets;
 	}
 }
