@@ -127,16 +127,20 @@ public class NestedRange {
 	
 } 
 
+public enum StartFrom {Min, Center, Max}
 public class Slider
 {
-    public int Value {get; private set;}
+    public int Value {get{return value;}
+	 set{
+		Set(value);
+	}}
+	int value;
     public int Min {get {return start;} }
     public int Max {get {return end - 1;} }
 	int end{get{
 		return range.End.Value;
 	} }
 	int start {get{
-
 		return range.Start.Value;
 	} }
 	Range range{get; init;}
@@ -144,18 +148,21 @@ public class Slider
 	/// <summary>
 	/// if given parameter is (1..3), a Slider travels from 1 to 2.
 	/// </summary>
-    public Slider(Range _range, int start = 0) {
+    public Slider(Range _range, StartFrom start_from = StartFrom.Center) {
         // if (ma < 0) throw new ArgumentOutOfRangeException("Max must not minus!");
         if (start < 0 || start >= _range.End.Value)
 			throw new ArgumentOutOfRangeException($"start value({start}) is not in [0..{Max}]. ");           
         range = _range; // end = ma;
-        Value = start;
+			value = start_from switch {
+		StartFrom.Min => range.Start.Value,
+		StartFrom.Center => (range.Start.Value + range.End.Value) / 2,
+		StartFrom.Max => range.End.Value - 1};
     }
 
     public bool Inc(){
-        if (Value == Max)
+        if (value == Max)
 			return false;
-        Value += 1;
+        value += 1;
         return true;
     }
 	public int Add(int n) {
@@ -168,9 +175,9 @@ public class Slider
 		return i;
 	}
     public bool Dec(){
-        if (Value == start) 
+        if (value == start) 
 			return false;
-        Value -= 1;
+        value -= 1;
         return true;
     }
 
@@ -191,15 +198,15 @@ public class Slider
 			return Sub(-n);
 		return 0;
 	}
-    public bool set(int nv) {
-        if (nv == Value)
+    public bool Set(int nv) {
+        if (nv == value)
             return false;
         if (nv <= start)
-			Value = start;
+			value = start;
 		else if (nv > Max)
-			Value = Max;
+			value = Max;
 		else
-        	Value = nv;
+        	value = nv;
         return true;
     }
 
