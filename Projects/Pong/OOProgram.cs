@@ -37,7 +37,7 @@ var (screen_w, screen_h) = OnScreen.init(screen_width, screen_height);
 var game = new Game(speed_ratio, screen_w, screen_h, paddle_width, rotation, refresh_delay, oppo_delay);
 game.Run();
 public class Game {
-	// public Ball ball;
+	public Ball Ball;
 	public PaddleScreen screen;
 	public SelfPaddle selfPadl;
 	public OpponentPaddle oppoPadl;
@@ -54,6 +54,9 @@ public class Game {
 		oppoPadl = new(range: screen.PaddleRange, width: paddleWidth);
 		screen.Paddles[0] = selfPadl;
 		screen.Paddles[1] = oppoPadl;
+		var ballSpec = screen.BallRanges;
+		Ball = new(ballSpec[0], ballSpec[1], screen.isRotated);
+		screen.Ball = Ball;
 		if (rot == Rotation.Vertical){
 			manipDict[ConsoleKey.UpArrow] = ()=>{ return selfPadl.Shift(-1); };
 			manipDict[ConsoleKey.DownArrow] = ()=>{ return selfPadl.Shift(1); };
@@ -100,12 +103,11 @@ public class Game {
 				Console.ReadKey(true);
 		}
 		var isBallMoved = screen.drawBall(); // screen.Ball.Move();
-            if (isBallMoved)
-            { var offsets = screen.Ball.offsets;
-                if (offsets.y == 1)
-                {
+            if (isBallMoved) {
+				var offsets = Ball.offsets;
+                if (offsets.y == Ball.YOffset.Min) {
                     var selfPadlStart = selfPadl.Offset.Value;
-                    var selfPadlEnd = selfPadlStart + selfPadl.Width;
+                    var selfPadlEnd = selfPadlStart + selfPadl.Width + 1;
                     if (!(selfPadlStart..selfPadlEnd).Contains(offsets.x))
                     {
                         screen.SetCursorPosition(0, 0);
