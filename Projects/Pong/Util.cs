@@ -130,14 +130,19 @@ public class NestedRange {
 public class Slider
 {
     public int Value {get; private set;}
+    public int Min {get {return start;} }
     public int Max {get {return end - 1;} }
 	int end{get{
 		return range.End.Value;
 	} }
+	int start {get{
+
+		return range.Start.Value;
+	} }
 	Range range{get; init;}
 
 	/// <summary>
-	/// if given parameter is 2, a Slider moves between 0 to 1.
+	/// if given parameter is (1..3), a Slider travels from 1 to 2.
 	/// </summary>
     public Slider(Range _range, int start = 0) {
         // if (ma < 0) throw new ArgumentOutOfRangeException("Max must not minus!");
@@ -163,7 +168,7 @@ public class Slider
 		return i;
 	}
     public bool Dec(){
-        if (Value == 0) 
+        if (Value == start) 
 			return false;
         Value -= 1;
         return true;
@@ -174,7 +179,7 @@ public class Slider
 		while(n-- > 0) {
 			if (!Dec())
 				break;
-			++i;
+			--i;
 		}
 		return i;
 	}
@@ -183,14 +188,14 @@ public class Slider
 		if (n > 0) 
 			return Add(n);
 		else if (n < 0)
-			return -Sub(-n);
+			return Sub(-n);
 		return 0;
 	}
     public bool set(int nv) {
         if (nv == Value)
             return false;
-        if (nv < 0)
-			Value = 0;
+        if (nv <= start)
+			Value = start;
 		else if (nv > Max)
 			Value = Max;
 		else
