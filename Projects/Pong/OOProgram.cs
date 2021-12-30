@@ -62,7 +62,10 @@ public class Game {
 	TimeSpan ballDelay;
 	public Game(int speed_ratio, int screen_w, int screen_h, int paddleWidth, Rotation rot, 
 		int refresh_delay, int opponent_delay, int ball_delay, int ball_angle){
+
 		screen = new(screen_w, screen_h, rot == Rotation.Vertical ? true : false);
+		if (paddleWidth >= screen.SideToSide / 2)
+			paddleWidth = screen.SideToSide / 2;
 		selfPadl = new(range: screen.PaddleRange, width: paddleWidth, manipDict);
 		oppoPadl = new(range: screen.PaddleRange, width: paddleWidth);
 		screen.Paddles[0] = selfPadl;
