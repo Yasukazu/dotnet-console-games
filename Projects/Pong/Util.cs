@@ -156,7 +156,8 @@ public class Slider
 			value = start_from switch {
 		StartFrom.Min => range.Start.Value,
 		StartFrom.Center => (range.Start.Value + range.End.Value) / 2,
-		StartFrom.Max => range.End.Value - 1};
+		StartFrom.Max => range.End.Value - 1,
+		_ => throw new ArgumentException("")};
     }
 
     public bool Inc(){
