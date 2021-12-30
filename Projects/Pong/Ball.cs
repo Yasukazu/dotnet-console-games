@@ -69,8 +69,8 @@ public class Ball // : ScreenDrawItem
 		X += dX;
 		Y += dY;
 		var old_offsets = new Offsets(XOffset.Value, YOffset.Value);
-		XOffset.Set((int)X);
-		YOffset.Set((int)Y);
+		XOffset.Set((int)Math.Round(X));
+		YOffset.Set((int)Math.Round(Y));
 		return (new Offsets(XOffset.Value, YOffset.Value)) != old_offsets;
 	}
 }
