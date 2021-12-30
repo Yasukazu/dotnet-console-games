@@ -24,15 +24,14 @@ public class Ball // : ScreenDrawItem
 	/// </summary>
 	/// <param name="x_range"></param>
 	/// <param name="y_range"></param>
-	/// <param name="rotate"></param>
 	/// <param name="start_from"></param>
 	/// <param name="degree">random dx and dy are set if 0</param>
-    public Ball(Range x_range, Range y_range, bool rotate, StartFrom start_from = StartFrom.Center, int degree = 0) {
+    public Ball(Range x_range, Range y_range, StartFrom start_from = StartFrom.Center, int degree = 0) {
         float dx, dy;
         if (degree == 0) {
             float randomFloat = (float)random.NextDouble() * 2f;
-            dx = Math.Max(randomFloat, 1f - randomFloat);
-            dy = 1f - dx;
+            dy = Math.Max(randomFloat, 1f - randomFloat);
+            dx = 1f - dy;
         } else {
             dx = (float)Math.Sin(degree);
             dy = (float)Math.Cos(degree);
@@ -41,15 +40,14 @@ public class Ball // : ScreenDrawItem
 		 * (y_range.End.Value - y_range.Start.Value)) / 10;
 		dx *= k;
 		dy *= k;
-        if (rotate) {
+        /* if (rotate) {
             (dY, dX) = (dx, dy);
             XOffset = new Slider(y_range);
             YOffset = new Slider(x_range);
-        } else {
-            (dX, dY) = (dx, dy);
-            XOffset = new Slider(x_range);
-            YOffset = new Slider(y_range);
-        }
+        } else { */
+        (dX, dY) = (dx, dy);
+        XOffset = new Slider(x_range);
+        YOffset = new Slider(y_range);
         X = XOffset.Value;
         Y = YOffset.Value;
     }
