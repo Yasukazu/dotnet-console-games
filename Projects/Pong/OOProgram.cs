@@ -19,7 +19,7 @@ var screen_height = 12;
 var paddle_width = 8;
 var refresh_delay = 100;
 var oppo_delay = 300;
-var ball_delay = 200;
+var ball_delay = 100;
 var ball_angle = 0;
 if (parseResult.Tag == ParserResultType.Parsed){
 	if(parseResult.Value.speed > 0)
@@ -41,7 +41,8 @@ if (parseResult.Tag == ParserResultType.Parsed){
 		ball_delay = parseResult.Value.ball_angle;
 }
 Rotation rot = _rotation switch {
-	0 => Rotation.Horizontal, 90 => Rotation.Vertical
+	0 => Rotation.Horizontal, 90 => Rotation.Vertical,
+	_ => throw new ArgumentException("Rotation must be one of {0, 90}.")
 };
 var (screen_w, screen_h) = OnScreen.init(screen_width, screen_height);
 var game = new Game(speed_ratio, screen_w, screen_h, paddle_width, rot, refresh_delay, oppo_delay, ball_delay, ball_angle);
@@ -71,7 +72,7 @@ public class Game {
 		screen.Paddles[0] = selfPadl;
 		screen.Paddles[1] = oppoPadl;
 		var ballSpec = screen.BallRanges;
-		Ball = new(ballSpec[0], ballSpec[1], screen.isRotated, StartFrom.Center, ball_angle);
+		Ball = new(ballSpec[0], ballSpec[1], StartFrom.Center, ball_angle);
 		screen.Ball = Ball;
 		if (rot == Rotation.Vertical){
 			manipDict[ConsoleKey.UpArrow] = ()=>{ return selfPadl.Shift(-speed_ratio); };
