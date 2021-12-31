@@ -4,9 +4,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using CommandLineParser; // Original source code: https://github.com/wertrain/command-line-parser-cs (Version 0.1)
 
-ConsoleTraceListener myWriter = new GonsoleTraceListener();
+// ConsoleTraceListener myWriter = new GonsoleTraceListener();
 // Trace.Listeners.Add(myWriter);
 Debug.Write("myWriter is added to Trace.Listeners.  OOProgram start.");
 var _rotation = 90; // Rotation.Horizontal;
@@ -50,8 +51,8 @@ game.Run();
 public class Game {
 	public Ball Ball;
 	public PaddleScreen screen;
-	public SelfPaddle selfPadl;
-	public OpponentPaddle oppoPadl;
+	volatile public SelfPaddle selfPadl;
+	volatile public OpponentPaddle oppoPadl;
 	public BitArray SelfOutputImage, OpponentOutputImage;
 	// public int PaddleWidth {get; init;}
 	public Dictionary<System.ConsoleKey, Func<int>> manipDict = new();	
@@ -126,10 +127,11 @@ public class Game {
 				Console.ReadKey(true);
 		}
 		if(ballStopwatch.Elapsed > ballDelay){
+			var old_dy = Ball.dY;
 			var isBallMoved = screen.drawBall(); // screen.Ball.Move();
             if (isBallMoved) {
 				var offsets = Ball.offsets;
-                if (offsets.y == Ball.YOffset.Min) {
+                if (old_dy < 0 && offsets.y <= Ball.YOffset.Min + 1) {
                     var selfPadlStart = selfPadl.Offset.Value;
                     var selfPadlEnd = selfPadlStart + selfPadl.Width + 1;
                     if (!(selfPadlStart..selfPadlEnd).Contains(offsets.x))
@@ -140,8 +142,7 @@ public class Game {
                         goto exit;
                     }
                 }
-                else if (offsets.y >= screen.HomeToAway)
-                {
+                else if (old_dy > 0 && offsets.y >= Ball.YOffset.Max - 1) {
                     var PadlStart = oppoPadl.Offset.Value;
                     var PadlEnd = PadlStart + oppoPadl.Width;
                     if (!(PadlStart..PadlEnd).Contains(offsets.x))
@@ -157,14 +158,19 @@ public class Game {
 		}
 		if(opponentStopwatch.Elapsed > opponentInputDelay){
 			var diff = screen.Ball.offsets.x - (oppoPadl.Offset.Value + oppoPadl.Width / 2);
-			if (Math.Abs(diff) > 0){
+			if (Math.Abs(diff) > 1){
+				Task.Run(()=> {
+					Task.Delay(opponentInputDelay).Wait();
 				oppoPadl.Shift(diff < 0 ? -1 : 1);
 				screen.draw(oppoPadl);
+				});
 			}
 			opponentStopwatch.Restart();
 		}
 
-		Thread.Sleep(delay);
+		// Thread.Sleep(delay);
+			var task = Task.Delay(delay);
+			task.Wait();
 	}
 	exit:
 	Console.CursorVisible = true;
