@@ -211,6 +211,9 @@ public class Slider
         return true;
     }
 
+	public void Center() {
+		Move((Max - Min) / 2);
+	}
 }
 
 static class RangeExtention
