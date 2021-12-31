@@ -161,11 +161,11 @@ public class Game {
 			if (Math.Abs(diff) > 1){
 				Task.Run(()=> {
 					Task.Delay(opponentInputDelay).Wait();
-				oppoPadl.Shift(diff < 0 ? -1 : 1);
-				screen.draw(oppoPadl);
+					oppoPadl.Shift(diff < 0 ? -1 : 1);
+					screen.draw(oppoPadl);
+					opponentStopwatch.Restart();
 				});
 			}
-			opponentStopwatch.Restart();
 		}
 
 		// Thread.Sleep(delay);
