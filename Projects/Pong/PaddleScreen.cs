@@ -1,9 +1,13 @@
+using System.Net.Security;
+using System.Data;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
+public record BallSpec(Range xrange, Range yrange, Rotation rot);
 public class PaddleScreen : Screen {
+	public BallSpec BallSpec => new BallSpec(1..SideToSide, 1..HomeToAway, isRotated ? Rotation.Vertical : Rotation.Horizontal);
 	public int HomeToAway {get{
 		return isRotated ? w - 1 : h - 1;
 	}}
