@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/bin/Debug/net6.0/Pong.dll",
-            "args": ["-r", "90", "-a", "30"],
+            "args": ["-s", "3", "-p", "9", "-h", "30", "-a", "20", "-o", "40"],
             //"args": ["-o", "250", "-a", "30", "-h", "24", "-s", "2"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
