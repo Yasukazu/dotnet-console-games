@@ -31,13 +31,12 @@ public class Ball // : ScreenDrawItem
         if (degree == 0) {
             /* float randomFloat = (float)random.NextDouble() * 2f; dy = Math.Max(randomFloat, 1f - randomFloat);
              dx = 1f - dy; */
-			var dgr = random.Next(15) * (new int[]{1, -1}[random.Next(2)]);
-            dx = (float)Math.Sin(dgr);
-            dy = (float)Math.Cos(dgr);
-        } else {
-            dx = (float)Math.Sin(degree);
-            dy = (float)Math.Cos(degree);
+			degree = random.Next(15) * (new int[]{1, -1}[random.Next(2)]);
         }
+		Debug.Write($"degree:[{degree}] of Ball.");
+		var rad = (Math.PI / 180) * degree;
+        dx = (float)Math.Sin(rad);
+        dy = (float)Math.Cos(rad);
 		var k = (float)Math.Sqrt((dx*dx + dy*dy) * (x_range.End.Value - x_range.Start.Value)
 		 * (y_range.End.Value - y_range.Start.Value)) / 10;
 		dx *= k;
