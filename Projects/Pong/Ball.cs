@@ -29,9 +29,11 @@ public class Ball // : ScreenDrawItem
     public Ball(Range x_range, Range y_range, StartFrom start_from = StartFrom.Center, int degree = 0) {
         float dx, dy;
         if (degree == 0) {
-            float randomFloat = (float)random.NextDouble() * 2f;
-            dy = Math.Max(randomFloat, 1f - randomFloat);
-            dx = 1f - dy;
+            /* float randomFloat = (float)random.NextDouble() * 2f; dy = Math.Max(randomFloat, 1f - randomFloat);
+             dx = 1f - dy; */
+			var dgr = random.Next(15) * (new int[]{1, -1}[random.Next(2)]);
+            dx = (float)Math.Sin(dgr);
+            dy = (float)Math.Cos(dgr);
         } else {
             dx = (float)Math.Sin(degree);
             dy = (float)Math.Cos(degree);
