@@ -18,7 +18,7 @@ public class Ball // : ScreenDrawItem
 	public Slider XOffset{get; init;}
 	public Slider YOffset{get; init;}
 	Random random = new();
-
+	int org_degree {get; init;}
 	/// <summary>
 	/// itself has dX and dY
 	/// </summary>
@@ -33,12 +33,14 @@ public class Ball // : ScreenDrawItem
              dx = 1f - dy; */
 			degree = random.Next(15) * (new int[]{1, -1}[random.Next(2)]);
         }
+		else
+			org_degree = degree;
 		Debug.Write($"degree:[{degree}] of Ball.");
 		var rad = (Math.PI / 180) * degree;
         dx = (float)Math.Sin(rad);
         dy = (float)Math.Cos(rad);
-		var k = (float)Math.Sqrt((dx*dx + dy*dy) * (x_range.End.Value - x_range.Start.Value)
-		 * (y_range.End.Value - y_range.Start.Value)) / 10;
+		var k = (float)Math.Sqrt(Math.Pow(x_range.End.Value - x_range.Start.Value, 2)
+		 + Math.Pow(y_range.End.Value - y_range.Start.Value, 2)) / 10;
 		dx *= k;
 		dy *= k;
         /* if (rotate) {
@@ -53,7 +55,28 @@ public class Ball // : ScreenDrawItem
         Y = YOffset.Value;
     }
 
-
+	public void Reset() {
+        float dx, dy;
+		int degree;
+        if (org_degree == 0) {
+			degree = random.Next(15) * (new int[]{1, -1}[random.Next(2)]);
+        }
+		else
+			degree = org_degree;
+		Debug.Write($"degree:[{degree}] of Ball.");
+		var rad = (Math.PI / 180) * degree;
+        dx = (float)Math.Sin(rad);
+        dy = (float)Math.Cos(rad);
+		var k = (float)Math.Sqrt(Math.Pow(XOffset.Max, 2) +
+		 Math.Pow(YOffset.Max, 2)) / 10;
+		dx *= k;
+		dy *= k;
+        (dX, dY) = (dx, dy);
+		XOffset.Center();
+		YOffset.Center();
+        X = XOffset.Value;
+        Y = YOffset.Value;
+	}
 	/// <summary>
 	/// Change self value with dx or dy
 	/// </summary>
