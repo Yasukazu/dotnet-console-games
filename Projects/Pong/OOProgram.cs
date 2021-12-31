@@ -6,9 +6,9 @@ using System.Diagnostics;
 using System.Threading;
 using CommandLineParser; // Original source code: https://github.com/wertrain/command-line-parser-cs (Version 0.1)
 
-//    ConsoleTraceListener myWriter = new GonsoleTraceListener();
-//    Trace.Listeners.Add(myWriter);
-Debug.Write("OOProgram start.");
+ConsoleTraceListener myWriter = new GonsoleTraceListener();
+// Trace.Listeners.Add(myWriter);
+Debug.Write("myWriter is added to Trace.Listeners.  OOProgram start.");
 var _rotation = 90; // Rotation.Horizontal;
 var clargs = Environment.GetCommandLineArgs();
 var pArgs = clargs[1..];
@@ -38,7 +38,7 @@ if (parseResult.Tag == ParserResultType.Parsed){
 	if(parseResult.Value.ball_delay > 0)
 		ball_delay = parseResult.Value.ball_delay;
 	if(parseResult.Value.ball_angle != 0)
-		ball_delay = parseResult.Value.ball_angle;
+		ball_angle = parseResult.Value.ball_angle;
 }
 Rotation rot = _rotation switch {
 	0 => Rotation.Horizontal, 90 => Rotation.Vertical,
@@ -69,10 +69,12 @@ public class Game {
 			paddleWidth = screen.SideToSide / 2;
 		selfPadl = new(range: screen.PaddleRange, width: paddleWidth, manipDict);
 		oppoPadl = new(range: screen.PaddleRange, width: paddleWidth);
-		screen.Paddles[0] = selfPadl;
-		screen.Paddles[1] = oppoPadl;
-		var ballSpec = screen.BallRanges;
-		Ball = new(ballSpec[0], ballSpec[1], StartFrom.Center, ball_angle);
+		var ballSpec = screen.BallSpec;
+		Ball = new(ballSpec.xrange, ballSpec.yrange, StartFrom.Center, ball_angle); 
+		/* ballSpec.rot switch {
+			Rotation.Horizontal => ball_angle,
+			Rotation.Vertical => 90 - ball_angle,
+			_  => throw new ArgumentException($"{ballSpec.rot} is not supported as ball angle!")}); */
 		screen.Ball = Ball;
 		if (rot == Rotation.Vertical){
 			manipDict[ConsoleKey.UpArrow] = ()=>{ return selfPadl.Shift(-speed_ratio); };
@@ -197,7 +199,7 @@ public class GonsoleTraceListener : ConsoleTraceListener {
 		var (x,y) = Console.GetCursorPosition();
 		Console.SetCursorPosition(0, 0);
 		Trace.WriteLine(s);
-		Console.ReadKey();
+		// Console.ReadKey();
 		Console.SetCursorPosition(x,y);
 	}
 
