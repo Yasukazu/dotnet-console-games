@@ -62,6 +62,7 @@ public class Game {
 	Stopwatch ballStopwatch = new();
 	TimeSpan opponentInputDelay;
 	TimeSpan ballDelay;
+	int[] Points = {3, 3}; // self, opponent
 	public Game(int speed_ratio, int screen_w, int screen_h, int paddleWidth, Rotation rot, 
 		int refresh_delay, int opponent_delay, int ball_delay, int ball_angle){
 
@@ -71,12 +72,11 @@ public class Game {
 		selfPadl = new(range: screen.PaddleRange, width: paddleWidth, manipDict);
 		oppoPadl = new(range: screen.PaddleRange, width: paddleWidth);
 		var ballSpec = screen.BallSpec;
-		Ball = new(ballSpec.xrange, ballSpec.yrange, StartFrom.Center, ball_angle); 
+		screen.Ball = Ball = new(ballSpec.xrange, ballSpec.yrange, StartFrom.Center, ball_angle); 
 		/* ballSpec.rot switch {
 			Rotation.Horizontal => ball_angle,
 			Rotation.Vertical => 90 - ball_angle,
 			_  => throw new ArgumentException($"{ballSpec.rot} is not supported as ball angle!")}); */
-		screen.Ball = Ball;
 		if (rot == Rotation.Vertical){
 			manipDict[ConsoleKey.UpArrow] = ()=>{ return selfPadl.Shift(-speed_ratio); };
 			manipDict[ConsoleKey.DownArrow] = ()=>{ return selfPadl.Shift(speed_ratio); };
@@ -91,6 +91,7 @@ public class Game {
 		ballDelay = TimeSpan.FromMilliseconds(Math.Round(ball_delay / Ball.Stride));
 	// pdl = new VPaddle(screen.w, paddle_width); // NestedRange(0..(width / 3), 0..width);
 	Console.CancelKeyPress += delegate {
+		Console.Clear();
 		Console.CursorVisible = true;
 	};
 	Console.CursorVisible = false; // hide cursor
@@ -109,10 +110,9 @@ public class Game {
 	public void Run(){
 		opponentStopwatch.Restart();
 		ballStopwatch.Restart();
-	while(true){
+	while(Points.Min() > 0) {
 		int react;
-		if (Console.KeyAvailable)
-		{
+		if (Console.KeyAvailable) {
 			System.ConsoleKey key = Console.ReadKey(true).Key;
 			if (key == ConsoleKey.Escape)
 				goto exit;
@@ -134,31 +134,32 @@ public class Game {
                 if (old_dy < 0 && offsets.y <= Ball.YOffset.Min + 1) {
                     var selfPadlStart = selfPadl.Offset.Value;
                     var selfPadlEnd = selfPadlStart + selfPadl.Width + 1;
-                    if (!(selfPadlStart..selfPadlEnd).Contains(offsets.x))
-                    {
-                        screen.SetCursorPosition(0, 0);
-                        Console.Write("Your paddle failed to hit the ball!: Hit any key..");
-                        Console.ReadKey();
-                        goto exit;
+                    if (!(selfPadlStart..selfPadlEnd).Contains(offsets.x)) {
+						--Points[0];
+						screen.resetBall();
+						opponentStopwatch.Restart();
+						ballStopwatch.Restart();
+						continue;
                     }
                 }
                 else if (old_dy > 0 && offsets.y >= Ball.YOffset.Max - 1) {
                     var PadlStart = oppoPadl.Offset.Value;
                     var PadlEnd = PadlStart + oppoPadl.Width;
-                    if (!(PadlStart..PadlEnd).Contains(offsets.x))
-                    {
-                        screen.SetCursorPosition(0, 0);
-                        Console.Write("Opponent's paddle failed to hit the ball!: Hit any key..");
-                        Console.ReadKey();
-                        goto exit;
+                    if (!(PadlStart..PadlEnd).Contains(offsets.x)) {
+						--Points[1];
+						screen.resetBall();
+						opponentStopwatch.Restart();
+						ballStopwatch.Restart();
+						continue;
                     }
                 }
             }
 			ballStopwatch.Restart();
 		}
-		if(opponentStopwatch.Elapsed > opponentInputDelay){
+		if(opponentStopwatch.IsRunning && opponentStopwatch.Elapsed > opponentInputDelay){
 			var diff = screen.Ball.offsets.x - (oppoPadl.Offset.Value + oppoPadl.Width / 2);
-			if (Math.Abs(diff) > 1){
+			if (Math.Abs(diff) > 1){ // know when diff. is 2
+				opponentStopwatch.Stop();
 				Task.Run(()=> {
 					Task.Delay(opponentInputDelay).Wait();
 					oppoPadl.Shift(diff < 0 ? -1 : 1);
@@ -169,10 +170,28 @@ public class Game {
 		}
 
 		// Thread.Sleep(delay);
-			var task = Task.Delay(delay);
+		using(var task = Task.Delay(delay)) {
 			task.Wait();
+		}
 	}
 	exit:
+    screen.SetCursorPosition(0, 0);
+
+	string msg;
+	switch ((Points[0], Points[1])){
+		case (> 0, <= 0):
+		 msg = "You win";
+		 break;
+		case (<= 0, > 0):
+		 msg = "You lose";
+		 break;
+		default:
+		 msg = "Even-even";
+		 break;
+	}
+
+    Console.Write($"{msg}. Hit any key:");
+    Console.ReadKey();
 	Console.CursorVisible = true;
 	}
 }
