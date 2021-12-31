@@ -69,6 +69,15 @@ public class PaddleScreen : Screen {
 		}
 		return false;
 	}
+	public void resetBall() {
+		var offsets = Ball.offsets;
+		SetCursorPosition(offsets.x, offsets.y);
+		Console.Write((char)CharCode.SPC);
+		Ball.Reset();
+		offsets = Ball.offsets;
+		SetCursorPosition(offsets.x, offsets.y);
+		Console.Write(Ball.DispChar);
+	}
 	public void drawWalls() {
 		char c = isRotated ? '-' : '|';
 		void drawVLine(int fromLeft) {
