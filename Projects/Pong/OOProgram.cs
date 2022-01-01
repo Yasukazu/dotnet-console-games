@@ -137,7 +137,7 @@ public class Game {
             if (isBallMoved) {
 				bool doReset = false;
 				var offsets = Ball.offsets;
-                if (old_dy < 0 && offsets.y <= Ball.YOffset.Min + 1) {
+                if (old_dy < 0 && offsets.y <= Ball.YOffset.Min) {
                     var selfPadlStart = selfPadl.Offset.Value;
                     var selfPadlEnd = selfPadlStart + selfPadl.Width + 0;
                     if (!(selfPadlStart..selfPadlEnd).Contains(offsets.x)) {
@@ -145,7 +145,7 @@ public class Game {
 						doReset = true;
                     }
                 }
-                else if (old_dy > 0 && offsets.y >= Ball.YOffset.Max - 0) {
+                else if (old_dy > 0 && offsets.y >= Ball.YOffset.Max) {
                     var PadlStart = oppoPadl.Offset.Value;
                     var PadlEnd = PadlStart + oppoPadl.Width;
                     if (!(PadlStart..PadlEnd).Contains(offsets.x)) {
