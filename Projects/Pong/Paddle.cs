@@ -38,8 +38,13 @@ public class Paddle : ScreenDrawItem
         Debug.Assert(range.End.Value > width);
         Width = width;
         Offset = new(0..(range.End.Value - width + 1));
+        Reset();
         // buffer = new BitArray(range);
         // for (int i = 0; i < width; ++i) buffer[i] = true;
+    }
+
+    public void Reset() {
+        Offset.Center();
     }
 	
 /// <summary>Manipulate</summary>
