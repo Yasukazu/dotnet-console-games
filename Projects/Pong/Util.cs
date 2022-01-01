@@ -212,7 +212,7 @@ public class Slider
     }
 
 	public void Center() {
-		Move((Max - Min) / 2);
+		Set((Max - Min) / 2);
 	}
 }
 
