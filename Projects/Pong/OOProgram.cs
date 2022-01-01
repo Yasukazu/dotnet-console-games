@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Runtime.CompilerServices;
+using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -53,6 +54,7 @@ public class Game {
 	public PaddleScreen screen;
 	volatile public SelfPaddle selfPadl;
 	volatile public OpponentPaddle oppoPadl;
+	public Paddle[] Paddles = new Paddle[2]; // {selfPadl, oppoPadl};
 	public BitArray SelfOutputImage, OpponentOutputImage;
 	// public int PaddleWidth {get; init;}
 	public Dictionary<System.ConsoleKey, Func<int>> manipDict = new();	
@@ -63,6 +65,7 @@ public class Game {
 	TimeSpan opponentInputDelay;
 	TimeSpan ballDelay;
 	int[] Points = {3, 3}; // self, opponent
+	int newBallDelay = 800;
 	public Game(int speed_ratio, int screen_w, int screen_h, int paddleWidth, Rotation rot, 
 		int refresh_delay, int opponent_delay, int ball_delay, int ball_angle){
 
@@ -71,6 +74,8 @@ public class Game {
 			paddleWidth = screen.SideToSide / 2;
 		selfPadl = new(range: screen.PaddleRange, width: paddleWidth, manipDict);
 		oppoPadl = new(range: screen.PaddleRange, width: paddleWidth);
+		Paddles[0] = selfPadl;
+		Paddles[1] = oppoPadl;
 		var ballSpec = screen.BallSpec;
 		screen.Ball = Ball = new(ballSpec.xrange, ballSpec.yrange, StartFrom.Center, ball_angle); 
 		/* ballSpec.rot switch {
@@ -126,37 +131,44 @@ public class Game {
 			while(Console.KeyAvailable) // clear over input
 				Console.ReadKey(true);
 		}
-		if(ballStopwatch.Elapsed > ballDelay){
+		if(ballStopwatch.IsRunning && ballStopwatch.Elapsed > ballDelay){
 			var old_dy = Ball.dY;
 			var isBallMoved = screen.drawBall(); // screen.Ball.Move();
             if (isBallMoved) {
+				bool doReset = false;
 				var offsets = Ball.offsets;
                 if (old_dy < 0 && offsets.y <= Ball.YOffset.Min + 1) {
                     var selfPadlStart = selfPadl.Offset.Value;
-                    var selfPadlEnd = selfPadlStart + selfPadl.Width + 1;
+                    var selfPadlEnd = selfPadlStart + selfPadl.Width + 0;
                     if (!(selfPadlStart..selfPadlEnd).Contains(offsets.x)) {
 						--Points[0];
-						screen.resetBall();
-						opponentStopwatch.Restart();
-						ballStopwatch.Restart();
-						continue;
+						doReset = true;
                     }
                 }
-                else if (old_dy > 0 && offsets.y >= Ball.YOffset.Max - 1) {
+                else if (old_dy > 0 && offsets.y >= Ball.YOffset.Max - 0) {
                     var PadlStart = oppoPadl.Offset.Value;
                     var PadlEnd = PadlStart + oppoPadl.Width;
                     if (!(PadlStart..PadlEnd).Contains(offsets.x)) {
 						--Points[1];
-						screen.resetBall();
-						opponentStopwatch.Restart();
-						ballStopwatch.Restart();
-						continue;
+						doReset = true;
                     }
                 }
+				if (doReset) {
+					ballStopwatch.Stop();
+					Task.Run(()=> {
+						screen.resetBall();
+						Array.ForEach(Paddles, (p)=> {
+							p.Reset();
+							screen.draw(p);});
+						Task.Delay(newBallDelay).Wait();
+						ballStopwatch.Restart();
+					});
+					continue;
+				}
             }
-			ballStopwatch.Restart();
+
 		}
-		if(opponentStopwatch.IsRunning && opponentStopwatch.Elapsed > opponentInputDelay){
+		if(ballStopwatch.IsRunning && opponentStopwatch.IsRunning && opponentStopwatch.Elapsed > opponentInputDelay){
 			var diff = screen.Ball.offsets.x - (oppoPadl.Offset.Value + oppoPadl.Width / 2);
 			if (Math.Abs(diff) > 1){ // know when diff. is 2
 				opponentStopwatch.Stop();
@@ -191,7 +203,7 @@ public class Game {
 	}
 
     Console.Write($"{msg}. Hit any key:");
-    Console.ReadKey();
+    // Console.ReadKey();
 	Console.CursorVisible = true;
 	}
 }
