@@ -177,8 +177,10 @@ public class Game {
 				opponentStopwatch.Stop();
 				Task.Run(()=> {
 					Task.Delay(opponentInputDelay).Wait();
-					oppoPadl.Shift(diff < 0 ? -1 : 1);
-					DrawQueue.Enqueue( () => screen.draw(oppoPadl));
+					DrawQueue.Enqueue( () => {
+						oppoPadl.Shift(diff < 0 ? -1 : 1);
+						screen.draw(oppoPadl);
+					});
 					// screen.draw(oppoPadl);
 					opponentStopwatch.Restart();
 				});
