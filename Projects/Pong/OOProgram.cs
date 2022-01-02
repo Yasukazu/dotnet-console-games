@@ -180,9 +180,8 @@ public class Game {
 					DrawQueue.Enqueue( () => {
 						oppoPadl.Shift(diff < 0 ? -1 : 1);
 						screen.draw(oppoPadl);
+						opponentStopwatch.Restart();
 					});
-					// screen.draw(oppoPadl);
-					opponentStopwatch.Restart();
 				});
 			}
 		}
