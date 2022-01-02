@@ -14,7 +14,7 @@ Debug.Write("myWriter is added to Trace.Listeners.  OOProgram start.");
 var _rotation = 90; // Rotation.Horizontal;
 var clargs = Environment.GetCommandLineArgs();
 var pArgs = clargs[1..];
-var parseResult = Parser.Parse<Options>(pArgs);
+ParserResult<Options> parseResult = Parser.Parse<Options>(pArgs);
 var speed_ratio = 1;
 var screen_width = 32;
 var screen_height = 12;
@@ -41,6 +41,8 @@ if (parseResult.Tag == ParserResultType.Parsed){
 		ball_delay = parseResult.Value.ball_delay;
 	if(parseResult.Value.ball_angle != 0)
 		ball_angle = parseResult.Value.ball_angle;
+}else {
+	Environment.Exit(-1);
 }
 Rotation rot = _rotation switch {
 	0 => Rotation.Horizontal, 90 => Rotation.Vertical,
@@ -65,6 +67,7 @@ public class Game {
 	TimeSpan opponentInputDelay;
 	TimeSpan ballDelay;
 	int[] Points = {3, 3}; // self, opponent
+	Queue<Action> DrawQueue = new();
 	int newBallDelay = 800;
 	public Game(int speed_ratio, int screen_w, int screen_h, int paddleWidth, Rotation rot, 
 		int refresh_delay, int opponent_delay, int ball_delay, int ball_angle){
@@ -175,11 +178,14 @@ public class Game {
 				Task.Run(()=> {
 					Task.Delay(opponentInputDelay).Wait();
 					oppoPadl.Shift(diff < 0 ? -1 : 1);
-					screen.draw(oppoPadl);
+					DrawQueue.Enqueue( () => screen.draw(oppoPadl));
+					// screen.draw(oppoPadl);
 					opponentStopwatch.Restart();
 				});
 			}
 		}
+		while (DrawQueue.Count > 0)
+			DrawQueue.Dequeue()();
 
 		// Thread.Sleep(delay);
 		using(var task = Task.Delay(delay)) {
