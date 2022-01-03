@@ -1,39 +1,34 @@
-﻿using System.Reflection;
-using CommandLineParser;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Binder;
+using Microsoft.Extensions.Configuration.Ini;
 
+public class AppConfig {
+	static AppConfig? Instance;
 
-var _rotation = 90; // Rotation.Horizontal;
-var clargs = Environment.GetCommandLineArgs();
-var pArgs = clargs[1..];
-var parseResult = Parser.Parse<Options>(pArgs);
-var speed_ratio = 1;
-var screen_width = 32;
-var screen_height = 12;
-var paddle_width = 8;
-var refresh_delay = 100;
-var oppo_delay = 300;
-var ball_delay = 100;
-var ball_angle = 0;
-if (parseResult.Tag == ParserResultType.Parsed){
-	if(parseResult.Value.speed > 0)
-		speed_ratio = parseResult.Value.speed;
-	if(parseResult.Value.width > 0)
-		screen_width = parseResult.Value.width;
-	if(parseResult.Value.height > 0)
-		screen_height = parseResult.Value.height;
-	if(parseResult.Value.paddle > 0)
-		paddle_width = parseResult.Value.paddle;
-	_rotation = parseResult.Value.rotation; // != 0 ? parseResult.Value.rotation : 0;
-	if(parseResult.Value.delay > 0)
-		refresh_delay = parseResult.Value.delay;
-	if(parseResult.Value.oppo_delay > 0)
-		oppo_delay = parseResult.Value.oppo_delay;
-	if(parseResult.Value.ball_delay > 0)
-		ball_delay = parseResult.Value.ball_delay;
-	if(parseResult.Value.ball_angle != 0)
-		ball_angle = parseResult.Value.ball_angle;
+	public OptionsConfig? Options { get; set; }
+
+	public AppConfig() { }
+	public static AppConfig Get() {
+		if (Instance != null)
+			return Instance;
+		Instance = new ConfigulationBuilder();
+	}
+
 }
 
+    public class OptionsConfig
+    {
+public int rotation { get; set; }
+public int speed_ratio { get; set; }
+public int screen_width { get; set; }
+public int screen_height { get; set; }
+public int paddle_width { get; set; }
+public int refresh_delay { get; set; }
+public int oppo_delay { get; set; }
+public int ball_delay { get; set; }
+public int ball_angle { get; set; }
+    }
+/*
 class Options {
 	[Option('r', "rotation", Required =false, HelpText = "rotation default 0(not rotated) and others are 90(, 180 and 270).")]
 	public int rotation { get; set;}
@@ -54,3 +49,4 @@ class Options {
 	[Option('a', "initial angle", Required =false, HelpText = "initial ball angle. default 0(random)")]
 	public int ball_angle {get; set;}
 }
+*/
