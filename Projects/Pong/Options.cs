@@ -24,7 +24,7 @@ public class Options {
 	[Option('l', "load-from-XML", Required =false, HelpText = "Load options from XML file name. default ''(void).")]
 	public string load_from_xml {get; set;} = "";
 	public static string XmlName = @"options.xml";
-    public void SaveXML() {
+    public void SaveXML(string save_to_xml) {
         System.Xml.Serialization.XmlSerializer serializer = new (typeof(Options));
         using(System.IO.StreamWriter writer = new(save_to_xml, false, new System.Text.UTF8Encoding(false))){
             serializer.Serialize(writer, this);
