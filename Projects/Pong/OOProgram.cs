@@ -14,6 +14,8 @@ var _rotation = 90; // Rotation.Horizontal;
 var clargs = Environment.GetCommandLineArgs();
 var pArgs = clargs[1..];
 ParserResult<Options> parseResult = Parser.Parse<Options>(pArgs);
+// Save to XML Options
+
 // Make a new Options instance
 Options opt = parseResult.Value;
 Rotation rot = _rotation switch {
@@ -42,16 +44,20 @@ public class Game {
 	Queue<Action> DrawQueue = new();
 	int newBallDelay = 800;
 
-	public Game(Options opt) 
-{
+	public Game(Options opt) {
 
-Rotation rot = opt.rotation switch {
-	0 => Rotation.Horizontal, 90 => Rotation.Vertical,
-	_ => throw new ArgumentException("Rotation must be one of {0, 90}.")
-};
+		Rotation rot = opt.rotation switch {
+			0 => Rotation.Horizontal, 90 => Rotation.Vertical,
+			_ => throw new ArgumentException("Rotation must be one of {0, 90}.")
+		};
 		screen = new(opt.width, opt.height, rot == Rotation.Vertical ? true : false);
 		if (opt.paddle > screen.SideToSide / 2)
 			opt.paddle = screen.SideToSide / 2;
+		// Save options to XML
+		if(opt.save_to_xml){
+			Debug.WriteLine($"Saving options to XML file:{Options.XmlName}..");
+			opt.SaveXML(Options.XmlName);
+		}
 		selfPadl = new(range: screen.PaddleRange, width: opt.paddle, manipDict);
 		oppoPadl = new(range: screen.PaddleRange, width: opt.paddle);
 		screen.Paddles[0] = selfPadl;
