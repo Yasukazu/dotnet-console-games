@@ -1,23 +1,11 @@
-<<<<<<< HEAD
-﻿using System.Runtime.CompilerServices;
-using System;
-using System.Linq;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
-using CommandLineParser; // Original source code: https://github.com/wertrain/command-line-parser-cs (Version 0.1)
-=======
+﻿
 ﻿global using System;
 global using System.Linq;
 global using System.Collections;
 global using System.Collections.Generic;
 global using System.Diagnostics;
-global using System.Threading;
-
 global using CommandLineParser; // Original source code: https://github.com/wertrain/command-line-parser-cs (Version 0.1)
->>>>>>> tmp
+using System.Threading.Tasks;
 
 // ConsoleTraceListener myWriter = new GonsoleTraceListener();
 // Trace.Listeners.Add(myWriter);
@@ -25,49 +13,9 @@ Debug.Write("myWriter is added to Trace.Listeners.  OOProgram start.");
 var _rotation = 90; // Rotation.Horizontal;
 var clargs = Environment.GetCommandLineArgs();
 var pArgs = clargs[1..];
-<<<<<<< HEAD
 ParserResult<Options> parseResult = Parser.Parse<Options>(pArgs);
-=======
-var parseResult = Parser.Parse<Options>(pArgs);
-/*
->>>>>>> tmp
-var speed_ratio = 1;
-var screen_width = 32;
-var screen_height = 12;
-var paddle_width = 8;
-var delay = 100;
-var oppo_delay = 300;
-var ball_delay = 100;
-var ball_angle = 0;
-if (parseResult.Tag == ParserResultType.Parsed){
-	if(parseResult.Value.speed > 0)
-		speed_ratio = parseResult.Value.speed;
-	if(parseResult.Value.width > 0)
-		screen_width = parseResult.Value.width;
-	if(parseResult.Value.height > 0)
-		screen_height = parseResult.Value.height;
-	if(parseResult.Value.paddle > 0)
-		paddle_width = parseResult.Value.paddle;
-	_rotation = parseResult.Value.rotation;
-	if(parseResult.Value.delay > 0)
-		delay = parseResult.Value.delay;
-	if(parseResult.Value.oppo_delay > 0)
-		oppo_delay = parseResult.Value.oppo_delay;
-	if(parseResult.Value.ball_delay > 0)
-		ball_delay = parseResult.Value.ball_delay;
-	if(parseResult.Value.ball_angle != 0)
-<<<<<<< HEAD
-		ball_angle = parseResult.Value.ball_angle;
-}else {
-	Environment.Exit(-1);
-}
-=======
-		ball_delay = parseResult.Value.ball_angle;
-} */
 // Make a new Options instance
 Options opt = parseResult.Value;
-
->>>>>>> tmp
 Rotation rot = _rotation switch {
 	0 => Rotation.Horizontal, 90 => Rotation.Vertical,
 	_ => throw new ArgumentException("Rotation must be one of {0, 90}.")
@@ -80,7 +28,7 @@ public class Game {
 	public PaddleScreen screen;
 	volatile public SelfPaddle selfPadl;
 	volatile public OpponentPaddle oppoPadl;
-	public Paddle[] Paddles = new Paddle[2]; // {selfPadl, oppoPadl};
+	// public Paddle[] Paddles = new Paddle[2]; // {selfPadl, oppoPadl};
 	public BitArray SelfOutputImage, OpponentOutputImage;
 	// public int PaddleWidth {get; init;}
 	public Dictionary<System.ConsoleKey, Func<int>> manipDict = new();	
@@ -90,31 +38,11 @@ public class Game {
 	Stopwatch ballStopwatch = new();
 	TimeSpan opponentInputDelay;
 	TimeSpan ballDelay;
-<<<<<<< HEAD
 	int[] Points = {3, 3}; // self, opponent
 	Queue<Action> DrawQueue = new();
 	int newBallDelay = 800;
-	public Game(int speed_ratio, int screen_w, int screen_h, int paddleWidth, Rotation rot, 
-		int refresh_delay, int opponent_delay, int ball_delay, int ball_angle){
 
-		screen = new(screen_w, screen_h, rot == Rotation.Vertical ? true : false);
-		if (paddleWidth >= screen.SideToSide / 2)
-			paddleWidth = screen.SideToSide / 2;
-		selfPadl = new(range: screen.PaddleRange, width: paddleWidth, manipDict);
-		oppoPadl = new(range: screen.PaddleRange, width: paddleWidth);
-		Paddles[0] = selfPadl;
-		Paddles[1] = oppoPadl;
-		var ballSpec = screen.BallSpec;
-		screen.Ball = Ball = new(ballSpec.xrange, ballSpec.yrange, StartFrom.Center, ball_angle); 
-		/* ballSpec.rot switch {
-			Rotation.Horizontal => ball_angle,
-			Rotation.Vertical => 90 - ball_angle,
-			_  => throw new ArgumentException($"{ballSpec.rot} is not supported as ball angle!")}); */
-=======
 	public Game(Options opt) 
-/*(int speed_ratio, int screen_w, int screen_h, int paddleWidth, 
-Rotation rot, int refresh_delay, int opponent_delay, int ball_delay, 
-int ball_angle)*/
 {
 
 Rotation rot = opt.rotation switch {
@@ -131,7 +59,6 @@ Rotation rot = opt.rotation switch {
 		var ballSpec = screen.BallRanges;
 		Ball = new(ballSpec[0], ballSpec[1], StartFrom.Center, opt.ball_angle);
 		screen.Ball = Ball;
->>>>>>> tmp
 		if (rot == Rotation.Vertical){
 			manipDict[ConsoleKey.UpArrow] = ()=>{ return selfPadl.Shift(-opt.speed); };
 			manipDict[ConsoleKey.DownArrow] = ()=>{ return selfPadl.Shift(opt.speed); };
@@ -207,7 +134,7 @@ Rotation rot = opt.rotation switch {
 					ballStopwatch.Stop();
 					Task.Run(()=> {
 						screen.resetBall();
-						Array.ForEach(Paddles, (p)=> {
+						Array.ForEach(screen.Paddles, (p)=> {
 							p.Reset();
 							screen.draw(p);});
 						Task.Delay(newBallDelay).Wait();
