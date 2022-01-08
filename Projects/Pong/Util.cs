@@ -286,3 +286,14 @@ static class BitArrayExtention {
 }
 
 record ImageLineChar(BitArray Image, int Line, char Char);
+
+public class GonsoleTraceListener : ConsoleTraceListener {
+	public override void Write(string s){
+		var (x,y) = Console.GetCursorPosition();
+		Console.SetCursorPosition(0, 0);
+		Trace.WriteLine(s);
+		// Console.ReadKey();
+		Console.SetCursorPosition(x,y);
+	}
+
+}
