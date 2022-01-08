@@ -30,7 +30,7 @@ public class Options {
             serializer.Serialize(writer, this);
         }
     }
-	public Options LoadXML(string lod_from_xml) {
+	public Options LoadXML(string load_from_xml) {
         System.Xml.Serialization.XmlSerializer serializer = new (typeof(Options));
 		Options opt;
         using(System.IO.StreamReader reader = new(load_from_xml)){
