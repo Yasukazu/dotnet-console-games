@@ -16,9 +16,11 @@ public class Game {
 	int[] Points = {3, 3}; // self, opponent
 	Queue<Action> DrawQueue = new();
 	int newBallDelay = 800;
+	Options Opts;
 
 	public Game(Options opt) {
 
+		Opts = opt;
 		Rotation rot = opt.rotation switch {
 			0 => Rotation.Horizontal, 90 => Rotation.Vertical,
 			_ => throw new ArgumentException("Rotation must be one of {0, 90}.")
@@ -26,11 +28,6 @@ public class Game {
 		screen = new(opt.width, opt.height, rot == Rotation.Vertical ? true : false);
 		if (opt.paddle > screen.SideToSide / 2)
 			opt.paddle = screen.SideToSide / 2;
-		// Save options to XML
-		if(opt.save_to_xml != null){
-			Debug.WriteLine($"Saving options to XML file:{Options.XmlName}..");
-			opt.SaveXML(Options.XmlName);
-		}
 		selfPadl = new(range: screen.PaddleRange, width: opt.paddle, manipDict);
 		oppoPadl = new(range: screen.PaddleRange, width: opt.paddle);
 		screen.Paddles[0] = selfPadl;
@@ -131,7 +128,7 @@ public class Game {
 				Task.Run(()=> {
 					Task.Delay(opponentInputDelay).Wait();
 					DrawQueue.Enqueue( () => {
-						oppoPadl.Shift(diff < 0 ? -1 : 1);
+						oppoPadl.Shift(diff < 0 ? -Opts.Speed : Opts.Speed);
 						screen.draw(oppoPadl);
 						opponentStopwatch.Restart();
 					});
