@@ -4,6 +4,8 @@ public class Options {
 	public int rotation { get; set;} = 0;
 	[Option('s', "speed", Required =false, HelpText = "paddle speed ratio default 1")]
 	public int speed { get; set;} = 1;
+	[Option('S', "Speed", Required =false, HelpText = "opponent's paddle speed ratio default 1")]
+	public int Speed { get; set;} = 1;
 	[Option('w', "width", Required =false, HelpText = "screen width default 64")]
 	public int width {get; set;} = 32;
 	[Option('h', "height", Required =false, HelpText = "screen height default 24")]
