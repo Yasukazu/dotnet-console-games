@@ -23,24 +23,45 @@ if(opt.load_from_xml != ""){
 	new_opt = opt.LoadXML(opt.load_from_xml);
 }
 if(new_opt != null){
-	Debug.WriteLine($"Replacing opt with new_opt.");
-	opt = new_opt;
+	Debug.WriteLine($"Updating opt with new_opt.");
+	if(new_opt.height > 0)
+		opt.height = new_opt.height;
+	if(new_opt.load_from_xml != "")
+		opt.load_from_xml = new_opt.load_from_xml;
+	if(new_opt.oppo_delay > 0)
+		opt.oppo_delay = new_opt.oppo_delay;
+	if(new_opt.paddle > 0)
+		opt.paddle = new_opt.paddle;
+	if(new_opt.rotation != 0)
+		opt.rotation = new_opt.rotation;
+	if(new_opt.save_to_xml != "")
+		opt.save_to_xml = new_opt.save_to_xml;
+	if(new_opt.speed > 0)
+		opt.speed = new_opt.speed;
+	if(new_opt.width > 0)
+		opt.width = new_opt.width;
+	if(new_opt.ball_angle != 0)
+		opt.ball_angle = new_opt.ball_angle;
+	if(new_opt.ball_delay > 0)
+		opt.ball_delay = new_opt.ball_delay;
+	if(new_opt.delay > 0)
+		opt.delay = new_opt.delay;
 }
 // modify opt by last games
 var points_xml_file = @"points.xml" ;
 if(File.Exists(points_xml_file)){
-	Debug.WriteLine("Opning: " + points_xml_file);
+	Debug.WriteLine("Opening: " + points_xml_file);
 	Points[] pp = Points.LLoadXML(points_xml_file);
 	var selfPoints = pp.Select(x => x.Self).Sum();
 	var oppoPoints = pp.Select(x => x.Opponent).Sum();
 	if (selfPoints > oppoPoints){
 		var minus = 10;
-		Console.WriteLine("oppo delay -{minus}");
+		Debug.WriteLine("oppo delay -{minus}");
 		opt.oppo_delay -= minus;
 	}
 	else if (selfPoints < oppoPoints){
 		var plus = 50;
-		Console.WriteLine("ball delay +{plus}");
+		Debug.WriteLine("ball delay +{plus}");
 		opt.ball_delay += plus;
 	}
 }
@@ -77,5 +98,13 @@ for ( int i = 0; i < game_repeat; ++i){
 }
 Debug.WriteLine("Writing points to: " + points_xml_file);
 Points.SSaveXML(ppoints, points_xml_file);
-Console.Write("Hit any key to finish:");
+	// Save options to XML
+if(opt.save_to_xml != ""){
+	Debug.WriteLine($"Saving options to XML file \"{opt.save_to_xml}\" (y/n)?:{Options.XmlName}..");
+	var yn = Console.ReadKey(true);
+	if (yn.KeyChar == 'y' || yn.KeyChar == 'Y')
+		opt.SaveXML(opt.save_to_xml);
+}
+
+// Console.Write("Hit any key to finish:");
 Console.CursorVisible = true;
