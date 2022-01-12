@@ -106,9 +106,12 @@ for ( int i = 0; i < game_repeat; ++i){
     //Console.ReadKey();
 	ppoints[i] = points;
 	Options new_opts(Options opts) {
-		var new_oppo_delay = Prompt.Input<int>(o => o.WithMessage("opponent delay(" + opts.oppo_delay + "):").WithDefaultValue(opts.oppo_delay));
-		var new_speed = Prompt.Input<int>(o => o.WithMessage("speed(" + opts.speed + "):").WithDefaultValue(opts.speed));
-		var new_opts = opts with {oppo_delay = new_oppo_delay, speed = new_speed};
+		var new_oppo_delay = Prompt.Input<int>(o => o.WithMessage("opponent delay:").WithDefaultValue(opts.oppo_delay));
+		var new_speed = Prompt.Input<int>(o => o.WithMessage("self speed:").WithDefaultValue(opts.speed));
+		var new_oppo_speed = Prompt.Input<int>(o => o.WithMessage("opponent's speed:").WithDefaultValue(opts.Speed));
+		var new_ball_delay = Prompt.Input<int>(o => o.WithMessage("ball delay:").WithDefaultValue(opts.ball_delay));
+		var new_delay = Prompt.Input<int>(o => o.WithMessage("delay(refresh rate):").WithDefaultValue(opts.delay));
+		var new_opts = opts with {oppo_delay = new_oppo_delay, speed = new_speed, Speed = new_oppo_speed, ball_delay = new_ball_delay, delay = new_delay};
 		return new_opts;
 	}
 }
