@@ -1,5 +1,6 @@
 # Difference from original
 
+0. Branch name: "oop_dev"
 1. Easier opponent control in gameloop by Task and lambda:
 
 ``` c#
