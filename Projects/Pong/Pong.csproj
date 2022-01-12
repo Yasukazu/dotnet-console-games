@@ -10,6 +10,7 @@
 		<NoWarn>1701;1702;CA1050</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>
+	  <PackageReference Include="sharprompt" Version="2.4.0" />
 	  <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
 	</ItemGroup>
 </Project>

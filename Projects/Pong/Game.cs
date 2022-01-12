@@ -16,7 +16,7 @@ public class Game {
 	int[] Points = {3, 3}; // self, opponent
 	Queue<Action> DrawQueue = new();
 	int newBallDelay = 800;
-	Options Opts;
+	public Options Opts{get;init;}
 
 	public Game(Options opt) {
 

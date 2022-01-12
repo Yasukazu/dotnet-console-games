@@ -1,5 +1,5 @@
 
-public class Options {
+public record Options {
 	[Option('r', "rotation", Required =false, HelpText = "rotation default 0(not rotated) and others are 90(, 180 and 270).")]
 	public int rotation { get; set;} = 0;
 	[Option('s', "speed", Required =false, HelpText = "paddle speed ratio default 1")]

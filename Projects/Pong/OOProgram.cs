@@ -7,6 +7,8 @@ global using System.Diagnostics;
 global using CommandLineParser; // Original source code: https://github.com/wertrain/command-line-parser-cs (Version 0.1)
 global using System.Threading.Tasks;
 global using System.IO;
+using Sharprompt;
+using Sharprompt.Fluent;
 
 // ConsoleTraceListener myWriter = new GonsoleTraceListener();
 // Trace.Listeners.Add(myWriter);
@@ -92,9 +94,23 @@ for ( int i = 0; i < game_repeat; ++i){
 	};
 
 	Console.WriteLine($"{msg}\n{points.Self}/yours : {points.Opponent}/opponent's");
-    Console.Write($"{msg}. Hit any key:");
-    Console.ReadKey();
+	var yn = Prompt.Select<string>(o => o.WithMessage("Modify parameters(yes/no)?:")
+									  .WithItems(new[] {"yes", "no"})
+									  .WithDefaultValue("no"));
+	if (yn == "yes"){
+		Console.WriteLine("Starting to modify parameters..");
+		opt = new_opts(opt);
+		Console.WriteLine("Parameters are renewed.");
+	}
+    //Console.Write($"{msg}. Hit any key:");
+    //Console.ReadKey();
 	ppoints[i] = points;
+	Options new_opts(Options opts) {
+		var new_oppo_delay = Prompt.Input<int>(o => o.WithMessage("opponent delay(" + opts.oppo_delay + "):").WithDefaultValue(opts.oppo_delay));
+		var new_speed = Prompt.Input<int>(o => o.WithMessage("speed(" + opts.speed + "):").WithDefaultValue(opts.speed));
+		var new_opts = opts with {oppo_delay = new_oppo_delay, speed = new_speed};
+		return new_opts;
+	}
 }
 Debug.WriteLine("Writing points to: " + points_xml_file);
 Points.SSaveXML(ppoints, points_xml_file);
