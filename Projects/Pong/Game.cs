@@ -46,7 +46,7 @@ public class Game {
 		opponentInputDelay = TimeSpan.FromMilliseconds(opt.oppo_delay);
 		// Ball dX dY compensation
 		var ball_stride = Ball.Stride;
-		ballDelay = TimeSpan.FromMilliseconds(Math.Round(opt.ball_delay / Ball.Stride));
+		ballDelay = TimeSpan.FromMilliseconds(Math.Round((float)opt.ball_delay / Ball.Stride));
 	// pdl = new VPaddle(screen.w, paddle_width); // NestedRange(0..(width / 3), 0..width);
 	Console.CancelKeyPress += delegate {
 		Console.Clear();
@@ -66,8 +66,8 @@ public class Game {
 	}
 
 	public Points Run(){
-		opponentStopwatch.Restart();
-		ballStopwatch.Restart();
+		opponentStopwatch.Start();
+		ballStopwatch.Start();
 	while(Points.Min() > 0) {
 		int react;
 		if (Console.KeyAvailable) {
@@ -114,12 +114,12 @@ public class Game {
 							p.Reset();
 							screen.draw(p);});
 						Task.Delay(newBallDelay).Wait();
-						ballStopwatch.Restart();
 					});
+					ballStopwatch.Restart();
 					continue;
 				}
             }
-
+			ballStopwatch.Restart();
 		}
 		if(ballStopwatch.IsRunning && opponentStopwatch.IsRunning && opponentStopwatch.Elapsed > opponentInputDelay){
 			var diff = screen.Ball.offsets.x - (oppoPadl.Offset.Value + oppoPadl.Width / 2);
@@ -130,10 +130,12 @@ public class Game {
 					DrawQueue.Enqueue( () => {
 						oppoPadl.Shift(diff < 0 ? -Opts.oppo_speed : Opts.oppo_speed);
 						screen.draw(oppoPadl);
-						opponentStopwatch.Restart();
 					});
 				});
+				opponentStopwatch.Restart();
+				continue;
 			}
+			opponentStopwatch.Restart();
 		}
 		while (DrawQueue.Count > 0)
 			DrawQueue.Dequeue()();
