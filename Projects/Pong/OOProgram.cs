@@ -9,9 +9,9 @@ global using System.Threading.Tasks;
 global using System.IO;
 using Sharprompt;
 using Sharprompt.Fluent;
-using Terminal.Gui;
 
-//var demo = new MenuBarDemo();
+#nullable enable
+
 // ConsoleTraceListener myWriter = new GonsoleTraceListener();
 // Trace.Listeners.Add(myWriter);
 // Debug.Write("myWriter is added to Trace.Listeners.  OOProgram start.");
@@ -21,11 +21,19 @@ var pArgs = clargs[1..];
 ParserResult<Options> parseResult = Parser.Parse<Options>(pArgs);
 Options opt = parseResult.Value;
 // Load from XML file into options
-Options new_opt = null;
-if(opt.load_from_xml != ""){
-	Debug.WriteLine($"Starting to load XML file:{opt.load_from_xml}");
-	new_opt = opt.LoadXML(opt.load_from_xml);
+Options? new_opt = null;
+try {
+new_opt = (opt.load_from_xml != "") switch {
+	true => opt.LoadXML(opt.load_from_xml),
+// Debug.WriteLine($"Starting to load XML file:{opt.load_from_xml}");
+	false =>  // File.Exists(Options.XmlName) ?
+	opt.LoadXML(Options.XmlName)
+};
+} catch(IOException ex) {
+	Console.WriteLine("Error opening " + ex.Message);
 }
+	// Debug.WriteLine($"Starting to load XML file:" + Options.XmlName);
+
 if(new_opt != null){
 	Debug.WriteLine($"Updating opt with new_opt.");
 	if(new_opt.height > 0)
@@ -80,6 +88,7 @@ const int game_repeat = 3;
 Points[] ppoints = new Points[game_repeat];
 Game game;
 Console.Write("Hit any key to start:");
+bool modified = false;
 for ( int i = 0; i < game_repeat; ++i){
 	game = new Game(opt); // speed_ratio, screen_w, screen_h, paddle_width, rot, delay, oppo_delay, ball_delay, ball_angle);
 	var points = game.Run();
@@ -96,11 +105,12 @@ for ( int i = 0; i < game_repeat; ++i){
 	};
 
 	Console.WriteLine($"{msg}\n{points.Self}/yours : {points.Opponent}/opponent's");
-    if (i < game_repeat) {
+    if (i < game_repeat - 1) { // except last game1
         var yn = Prompt.Select<string>(o => o.WithMessage("Modify parameters?:")
                                           .WithItems(new[] { "yes", "no" })
                                           .WithDefaultValue("no"));
         if (yn == "yes") {
+			modified = true;
             Console.WriteLine("Starting to modify parameters..");
             opt = new_opts(opt);
             Console.WriteLine("Parameters are renewed.");
@@ -122,29 +132,21 @@ for ( int i = 0; i < game_repeat; ++i){
 Debug.WriteLine("Writing points to: " + points_xml_file);
 Points.SSaveXML(ppoints, points_xml_file);
 	// Save options to XML
-if(opt.save_to_xml != ""){
+if(modified || opt.save_to_xml != ""){
 	Debug.WriteLine($"Asking to save options to XML file \"{opt.save_to_xml}\".");
-	var yn = Prompt.Select<string>(o => o.WithMessage("Save parameters to " + opt.save_to_xml + "?")
+	var yn = Prompt.Select<string>(o => o.WithMessage("Save parameters to XML file?")
                                           .WithItems(new[] { "yes", "no" })
                                           .WithDefaultValue("no"));
-	// var yes_save = AskSaveOptions(opt.save_to_xml);
-	if (yn == "yes"){
-		opt.SaveXML(opt.save_to_xml);
+	if(yn == "yes"){
+		if (opt.save_to_xml == "") {
+			var filename = Prompt.Input<string>(o => o.WithMessage("Options XML filename:")
+			.WithDefaultValue(Options.XmlName));
+			opt.SaveXML(filename);
+		} else
+			opt.SaveXML(opt.save_to_xml);
 		Debug.WriteLine($"Saving options to XML file \"{opt.save_to_xml}\"."); 
 	}
 }
 
-// Console.Write("Hit any key to finish:");
 Console.CursorVisible = true;
 
-bool AskSaveOptions(string xml_filename){
-	bool okpressed = false;
-	var ok = new Button(3, 14, "Ok");
-	ok.Clicked += () => Application.RequestStop();
-	ok.Clicked += () => okpressed = true;
-	var cancel = new Button(10, 14, "Cancel");
-	cancel.Clicked += () => Application.RequestStop();
-	var dialog = new Dialog("Save options to:" + xml_filename + "?", 40, 18, ok, cancel);
-	Application.Run(dialog);
-	return okpressed;
-}
