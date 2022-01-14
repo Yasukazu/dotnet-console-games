@@ -9,7 +9,9 @@ global using System.Threading.Tasks;
 global using System.IO;
 using Sharprompt;
 using Sharprompt.Fluent;
+using Terminal.Gui;
 
+//var demo = new MenuBarDemo();
 // ConsoleTraceListener myWriter = new GonsoleTraceListener();
 // Trace.Listeners.Add(myWriter);
 // Debug.Write("myWriter is added to Trace.Listeners.  OOProgram start.");
@@ -94,24 +96,26 @@ for ( int i = 0; i < game_repeat; ++i){
 	};
 
 	Console.WriteLine($"{msg}\n{points.Self}/yours : {points.Opponent}/opponent's");
-	var yn = Prompt.Select<string>(o => o.WithMessage("Modify parameters(yes/no)?:")
-									  .WithItems(new[] {"yes", "no"})
-									  .WithDefaultValue("no"));
-	if (yn == "yes"){
-		Console.WriteLine("Starting to modify parameters..");
-		opt = new_opts(opt);
-		Console.WriteLine("Parameters are renewed.");
-	}
+    if (i < game_repeat) {
+        var yn = Prompt.Select<string>(o => o.WithMessage("Modify parameters?:")
+                                          .WithItems(new[] { "yes", "no" })
+                                          .WithDefaultValue("no"));
+        if (yn == "yes") {
+            Console.WriteLine("Starting to modify parameters..");
+            opt = new_opts(opt);
+            Console.WriteLine("Parameters are renewed.");
+        }
+    }
     //Console.Write($"{msg}. Hit any key:");
     //Console.ReadKey();
 	ppoints[i] = points;
 	Options new_opts(Options opts) {
 		var new_oppo_delay = Prompt.Input<int>(o => o.WithMessage("opponent delay:").WithDefaultValue(opts.oppo_delay));
 		var new_speed = Prompt.Input<int>(o => o.WithMessage("self speed:").WithDefaultValue(opts.speed));
-		var new_oppo_speed = Prompt.Input<int>(o => o.WithMessage("opponent's speed:").WithDefaultValue(opts.Speed));
+		var new_oppo_speed = Prompt.Input<int>(o => o.WithMessage("opponent's speed:").WithDefaultValue(opts.oppo_speed));
 		var new_ball_delay = Prompt.Input<int>(o => o.WithMessage("ball delay:").WithDefaultValue(opts.ball_delay));
 		var new_delay = Prompt.Input<int>(o => o.WithMessage("delay(refresh rate):").WithDefaultValue(opts.delay));
-		var new_opts = opts with {oppo_delay = new_oppo_delay, speed = new_speed, Speed = new_oppo_speed, ball_delay = new_ball_delay, delay = new_delay};
+		var new_opts = opts with {oppo_delay = new_oppo_delay, speed = new_speed, oppo_speed = new_oppo_speed, ball_delay = new_ball_delay, delay = new_delay};
 		return new_opts;
 	}
 }
@@ -119,11 +123,28 @@ Debug.WriteLine("Writing points to: " + points_xml_file);
 Points.SSaveXML(ppoints, points_xml_file);
 	// Save options to XML
 if(opt.save_to_xml != ""){
-	Debug.WriteLine($"Saving options to XML file \"{opt.save_to_xml}\" (y/n)?:{Options.XmlName}..");
-	var yn = Console.ReadKey(true);
-	if (yn.KeyChar == 'y' || yn.KeyChar == 'Y')
+	Debug.WriteLine($"Asking to save options to XML file \"{opt.save_to_xml}\".");
+	var yn = Prompt.Select<string>(o => o.WithMessage("Save parameters to " + opt.save_to_xml + "?")
+                                          .WithItems(new[] { "yes", "no" })
+                                          .WithDefaultValue("no"));
+	// var yes_save = AskSaveOptions(opt.save_to_xml);
+	if (yn == "yes"){
 		opt.SaveXML(opt.save_to_xml);
+		Debug.WriteLine($"Saving options to XML file \"{opt.save_to_xml}\"."); 
+	}
 }
 
 // Console.Write("Hit any key to finish:");
 Console.CursorVisible = true;
+
+bool AskSaveOptions(string xml_filename){
+	bool okpressed = false;
+	var ok = new Button(3, 14, "Ok");
+	ok.Clicked += () => Application.RequestStop();
+	ok.Clicked += () => okpressed = true;
+	var cancel = new Button(10, 14, "Cancel");
+	cancel.Clicked += () => Application.RequestStop();
+	var dialog = new Dialog("Save options to:" + xml_filename + "?", 40, 18, ok, cancel);
+	Application.Run(dialog);
+	return okpressed;
+}
