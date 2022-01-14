@@ -112,10 +112,11 @@ public class Game {
 						screen.resetBall();
 						Array.ForEach(screen.Paddles, (p)=> {
 							p.Reset();
-							screen.draw(p);});
+							DrawQueue.Enqueue( () => screen.draw(p) );
+						});
 						Task.Delay(newBallDelay).Wait();
+						ballStopwatch.Restart();
 					});
-					ballStopwatch.Restart();
 					continue;
 				}
             }
@@ -127,19 +128,16 @@ public class Game {
 				opponentStopwatch.Stop();
 				Task.Run(()=> {
 					Task.Delay(opponentInputDelay).Wait();
-					DrawQueue.Enqueue( () => {
-						oppoPadl.Shift(diff < 0 ? -Opts.oppo_speed : Opts.oppo_speed);
-						screen.draw(oppoPadl);
-					});
+					oppoPadl.Shift(diff < 0 ? -Opts.oppo_speed : Opts.oppo_speed);
+					DrawQueue.Enqueue( () => screen.draw(oppoPadl) );
+					opponentStopwatch.Restart();
 				});
-				opponentStopwatch.Restart();
 				continue;
 			}
 			opponentStopwatch.Restart();
 		}
 		while (DrawQueue.Count > 0)
 			DrawQueue.Dequeue()();
-
 		// Thread.Sleep(delay);
 		using(var task = Task.Delay(delay)) {
 			task.Wait();
@@ -147,7 +145,6 @@ public class Game {
 	}
 	exit:
 	return new Points(self: Points[0], opponent: Points[1]);
-
 	}
 }
 
