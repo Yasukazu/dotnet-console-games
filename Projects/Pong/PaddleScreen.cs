@@ -4,7 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-
+#nullable enable
 public record BallSpec(Range xrange, Range yrange, Rotation rot);
 public class PaddleScreen : Screen {
 	public BallSpec BallSpec => new BallSpec(1..SideToSide, 1..HomeToAway, isRotated ? Rotation.Vertical : Rotation.Horizontal);
@@ -43,7 +43,7 @@ public class PaddleScreen : Screen {
 		// WallLocations = {0, EndOfLines - 1};
 		SideWalls[0] = new SideWall(WallSide.Left, new Wall(1..EndOfLines));
 		SideWalls[1] = new SideWall(WallSide.Right, new Wall(1..EndOfLines));
-		// Ball = new(0..SideToSide, 0..HomeToAway, rotate);
+		Ball = new(0..SideToSide, 0..HomeToAway, 0);
 	}
 	public void draw(Paddle padl, bool replace_buffer = true) {
 		var side = padl.Side;
@@ -54,6 +54,8 @@ public class PaddleScreen : Screen {
 			drawImage(n, image, padl.DispChar);
 		else
 			redrawImage(n, image, padl.DispChar);
+		if(replace_buffer)
+		if(replace_buffer)
 		if(replace_buffer)
 			Lines[n] = image;
 	}
@@ -69,6 +71,21 @@ public class PaddleScreen : Screen {
 		}
 		return false;
 	}
+	public bool doBall(Queue<Action> drawQueue) {
+		var offsets = Ball.offsets;
+		if (Ball.Move()){
+			var new_offsets = Ball.offsets;
+			drawQueue.Enqueue(()=> {
+				SetCursorPosition(offsets.x, offsets.y);
+				Console.Write((char)CharCode.SPC);
+				SetCursorPosition(new_offsets.x, new_offsets.y);
+				Console.Write(Ball.DispChar);
+			});
+			return true;
+		}
+		return false;
+	}
+
 	public void resetBall() {
 		var offsets = Ball.offsets;
 		SetCursorPosition(offsets.x, offsets.y);
