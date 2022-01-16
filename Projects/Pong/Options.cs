@@ -32,7 +32,7 @@ public record Options {
             serializer.Serialize(writer, this);
         }
     }
-	public Options LoadXML(string load_from_xml) {
+	public static Options LoadXML(string load_from_xml) {
         System.Xml.Serialization.XmlSerializer serializer = new (typeof(Options));
 		Options opt;
         using(System.IO.StreamReader reader = new(load_from_xml)){
@@ -40,4 +40,23 @@ public record Options {
         }
 		return opt;
     }
+
+	public static Options MergeXML(Options orgo, Options newo){
+		Options defo = new Options(); // default
+		Options ropts = orgo with {
+			rotation = newo.rotation != defo.rotation ? newo.rotation : orgo.rotation,
+			speed = newo.speed != defo.speed ? newo.speed : orgo.speed,
+			oppo_speed = newo.oppo_speed != defo.oppo_speed ? newo.oppo_speed : orgo.oppo_speed,
+			width = newo.width != defo.width ? newo.width : orgo.width,
+			height = newo.height != defo.height ? newo.height : orgo.height, 
+			paddle = newo.paddle != defo.paddle ? newo.paddle : orgo.paddle, 
+			delay = newo.delay != defo.delay ? newo.delay : orgo.delay, 
+			oppo_delay = newo.oppo_delay != defo.oppo_delay ? newo.oppo_delay : orgo.oppo_delay, 
+			ball_delay = newo.ball_delay != defo.ball_delay ? newo.ball_delay : orgo.ball_delay, 
+			ball_angle = newo.ball_angle != defo.ball_angle ? newo.ball_angle : orgo.ball_angle, 
+			save_to_xml = newo.save_to_xml != defo.save_to_xml ? newo.save_to_xml : orgo.save_to_xml, 
+			load_from_xml = newo.load_from_xml != defo.load_from_xml ? newo.load_from_xml : orgo.load_from_xml, 
+		};
+		return ropts;
+	}
 }

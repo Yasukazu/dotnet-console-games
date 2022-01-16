@@ -15,52 +15,28 @@ using Sharprompt.Fluent;
 // ConsoleTraceListener myWriter = new GonsoleTraceListener();
 // Trace.Listeners.Add(myWriter);
 // Debug.Write("myWriter is added to Trace.Listeners.  OOProgram start.");
-var _rotation = 90; // Rotation.Horizontal;
+// var _rotation = 90; // Rotation.Horizontal;
 var clargs = Environment.GetCommandLineArgs();
 var pArgs = clargs[1..];
 ParserResult<Options> parseResult = Parser.Parse<Options>(pArgs);
-Options opt = parseResult.Value;
+Options copt = parseResult.Value; // command
 // Load from XML file into options
-Options? new_opt = null;
+Options? xopt = null;
 try {
-new_opt = (opt.load_from_xml != "") switch {
-	true => opt.LoadXML(opt.load_from_xml),
-// Debug.WriteLine($"Starting to load XML file:{opt.load_from_xml}");
-	false =>  // File.Exists(Options.XmlName) ?
-	opt.LoadXML(Options.XmlName)
-};
-} catch(IOException ex) {
-	Console.WriteLine("Error opening " + ex.Message);
+    xopt = (copt.load_from_xml != "") switch {
+        true => Options.LoadXML(copt.load_from_xml),
+        false => Options.LoadXML(Options.XmlName)
+    };
 }
-	// Debug.WriteLine($"Starting to load XML file:" + Options.XmlName);
+catch (IOException ex) {
+    Debug.WriteLine("Error opening " + ex.Message);
+}
 
-if(new_opt != null){
-	Debug.WriteLine($"Updating opt with new_opt.");
-	if(new_opt.height > 0)
-		opt.height = new_opt.height;
-	if(new_opt.load_from_xml != "")
-		opt.load_from_xml = new_opt.load_from_xml;
-	if(new_opt.oppo_delay > 0)
-		opt.oppo_delay = new_opt.oppo_delay;
-	if(new_opt.paddle > 0)
-		opt.paddle = new_opt.paddle;
-	if(new_opt.rotation != 0)
-		opt.rotation = new_opt.rotation;
-	if(new_opt.save_to_xml != "")
-		opt.save_to_xml = new_opt.save_to_xml;
-	if(new_opt.speed > 0)
-		opt.speed = new_opt.speed;
-	if(new_opt.width > 0)
-		opt.width = new_opt.width;
-	if(new_opt.ball_angle != 0)
-		opt.ball_angle = new_opt.ball_angle;
-	if(new_opt.ball_delay > 0)
-		opt.ball_delay = new_opt.ball_delay;
-	if(new_opt.delay > 0)
-		opt.delay = new_opt.delay;
-}
+Options opt = Options.MergeXML(xopt, copt);
+
 // modify opt by last games
-var points_xml_file = @"points.xml" ;
+ var points_xml_file = @"points.xml" ;
+/*
 if(File.Exists(points_xml_file)){
 	Debug.WriteLine("Opening: " + points_xml_file);
 	Points[] pp = Points.LLoadXML(points_xml_file);
@@ -77,12 +53,14 @@ if(File.Exists(points_xml_file)){
 		opt.ball_delay += plus;
 	}
 }
-
+*/
+/*
 Rotation rot = _rotation switch {
 	0 => Rotation.Horizontal, 90 => Rotation.Vertical,
 	_ => throw new ArgumentException("Rotation must be one of {0, 90}.")
-};
-(opt.width, opt.height) = OnScreen.init(opt.width, opt.height);
+}; */
+// adjust with environment screen size
+(int width, int height) = OnScreen.init(opt.width, opt.height);
 
 const int game_repeat = 3;
 Points[] ppoints = new Points[game_repeat];
@@ -90,7 +68,7 @@ Game game;
 Console.Write("Hit any key to start:");
 bool modified = false;
 for ( int i = 0; i < game_repeat; ++i){
-	game = new Game(opt); // speed_ratio, screen_w, screen_h, paddle_width, rot, delay, oppo_delay, ball_delay, ball_angle);
+	game = new Game(opt with {width = width, height = height}); // speed_ratio, screen_w, screen_h, paddle_width, rot, delay, oppo_delay, ball_delay, ball_angle);
 	var points = game.Run();
     game.screen.SetCursorPosition(0, 0);
 
