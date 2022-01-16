@@ -85,6 +85,19 @@ public class PaddleScreen : Screen {
 		}
 		return false;
 	}
+	public void doResetBall(Queue<Action> drawQueue) {
+		var offsets = Ball.offsets;
+		drawQueue.Enqueue(()=>{
+			SetCursorPosition(offsets.x, offsets.y);
+			Console.Write((char)CharCode.SPC);
+		});
+		Ball.Reset();
+		offsets = Ball.offsets;
+		drawQueue.Enqueue(()=>{
+			SetCursorPosition(offsets.x, offsets.y);
+			Console.Write(Ball.DispChar);
+		});
+	}
 
 	public void resetBall() {
 		var offsets = Ball.offsets;
