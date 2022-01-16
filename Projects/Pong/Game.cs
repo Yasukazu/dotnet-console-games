@@ -178,10 +178,11 @@ public class Game {
                     }
                 }
                 if (doReset) {
+                    screen.HideBall(DrawQueue);
 					ballTimer.Change(Timeout.Infinite, Timeout.Infinite);
 					ballIsRunning = false;
                     Task.Run(() => {
-                        screen.doResetBall(DrawQueue);
+                        screen.ResetBall(DrawQueue);
                         Array.ForEach(screen.Paddles, (p) => {
                             p.Reset();
                             DrawQueue.Enqueue(() => screen.draw(p));
