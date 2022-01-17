@@ -69,11 +69,11 @@ Console.Write("Hit any key to start:");
 bool modified = false;
 for ( int i = 0; i < game_repeat; ++i){
 	game = new Game(opt with {width = width, height = height}); // speed_ratio, screen_w, screen_h, paddle_width, rot, delay, oppo_delay, ball_delay, ball_angle);
-	var points = game.Run();
+	game.Run();
     game.screen.SetCursorPosition(0, 0);
 
 	string msg =
-	points switch {
+	game.score switch {
 		{Self: var self, Opponent: var oppo} when (self > 0 && oppo <= 0)
 		 => "You win",
 		{Self: var self, Opponent: var oppo} when (self <= 0  && oppo > 0)
@@ -82,7 +82,7 @@ for ( int i = 0; i < game_repeat; ++i){
 		 => "Even-even"
 	};
 
-	Console.WriteLine($"{msg}\n{points.Self}/yours : {points.Opponent}/opponent's");
+	Console.WriteLine($"{msg}\n{game.score.Self}/yours : {game.score.Opponent}/opponent's");
     if (i < game_repeat - 1) { // except last game1
         var yn = Prompt.Select<string>(o => o.WithMessage("Modify parameters?:")
                                           .WithItems(new[] { "yes", "no" })
@@ -96,7 +96,7 @@ for ( int i = 0; i < game_repeat; ++i){
     }
     //Console.Write($"{msg}. Hit any key:");
     //Console.ReadKey();
-	ppoints[i] = points;
+	ppoints[i] = game.score;
 	Options new_opts(Options opts) {
 		var new_oppo_delay = Prompt.Input<int>(o => o.WithMessage("opponent delay:").WithDefaultValue(opts.oppo_delay));
 		var new_speed = Prompt.Input<int>(o => o.WithMessage("self speed:").WithDefaultValue(opts.speed));
