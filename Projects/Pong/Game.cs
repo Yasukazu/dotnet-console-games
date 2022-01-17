@@ -1,5 +1,7 @@
 // using System.Threading;
 using System.Timers;
+using System.Threading;
+using System.Threading.Tasks;
 
 
 public class Game {
@@ -15,7 +17,7 @@ public class Game {
 	TimeSpan delay;
 	Stopwatch opponentStopwatch = new();
 	Stopwatch ballStopwatch = new();
-	Timer ballTimer;
+	System.Timers.Timer ballTimer;
 	bool ballIsRunning;
 	TimeSpan opponentInputDelay;
 	TimeSpan ballDelay;
@@ -69,22 +71,24 @@ public class Game {
 		screen.drawWalls();
 		screen.draw(selfPadl);
 		screen.draw(oppoPadl);
-		ballTimer = new Timer(Opts.ball_delay);//o => do_ball(o), null, 0, Opts.ball_delay);
+		ballTimer = new (Opts.ball_delay);//o => do_ball(o), null, 0, Opts.ball_delay);
 		ballTimer.AutoReset = true;
 	}
 
 	public void Run(){
-		opponentStopwatch.Start();
-		// ballStopwatch.Start();
+		CancellationTokenSource tokenSource = new();
+		var ctoken = tokenSource.Token;
+		opponentStopwatch.Start(); // ballStopwatch.Start();
 		ballTimer.Elapsed += do_ball;
-		ballTimer.Enabled = true;
-		// ballIsRunning = true;
+		ballTimer.Enabled = true; // ballIsRunning = true;
 	while(score.Min > 0) {
 		int react;
 		if (Console.KeyAvailable) {
 			System.ConsoleKey key = Console.ReadKey(true).Key;
-			if (key == ConsoleKey.Escape)
+			if (key == ConsoleKey.Escape){
+				tokenSource.Cancel();
 				goto exit;
+			}
 			if (selfPadl.ManipDict.ContainsKey(key)) {
 				react = selfPadl.ReactKey(key);
 				if(react != 0){
@@ -101,10 +105,12 @@ public class Game {
 				opponentStopwatch.Stop();
 				Task.Run(()=> {
 					Task.Delay(opponentInputDelay).Wait();
-					oppoPadl.Shift(diff < 0 ? -Opts.oppo_speed : Opts.oppo_speed);
-					DrawQueue.Enqueue( () => screen.draw(oppoPadl) );
+					if(!ctoken.IsCancellationRequested){
+						oppoPadl.Shift(diff < 0 ? -Opts.oppo_speed : Opts.oppo_speed);
+						DrawQueue.Enqueue( () => screen.draw(oppoPadl) );
+					}
 					opponentStopwatch.Restart();
-				});
+				}, ctoken);
 				continue;
 			}
 			opponentStopwatch.Restart();
@@ -117,6 +123,7 @@ public class Game {
 		}
 	}
 	exit:
+	tokenSource.Cancel();
 	ballTimer.Enabled = false;
 	return; // new Points(self: Points[0], opponent: Points[1]);
         void do_ball(object obj, ElapsedEventArgs eeas) {
@@ -144,19 +151,20 @@ public class Game {
                     }
                 }
                 if (doReset) {
-                    screen.HideBall(DrawQueue);
-					ballTimer.Enabled = false; // Change(Timeout.Infinite, Timeout.Infinite);
-					// ballIsRunning = false;
+					ballTimer.Enabled = false; // stop timer first
+                    screen.HideBall(DrawQueue); // erase ball before waiting Task
                     Task.Run(() => {
-                        screen.ResetBall(DrawQueue);
-                        Array.ForEach(screen.Paddles, (p) => {
-                            p.Reset();
-                            DrawQueue.Enqueue(() => screen.draw(p));
-                        });
-                        Task.Delay(newBallDelay).Wait();
+                        Task.Delay(newBallDelay).Wait(); // wait first
+						if(!ctoken.IsCancellationRequested){
+	                        screen.ResetBall(DrawQueue);
+	                        Array.ForEach(screen.Paddles, (p) => {
+	                            p.Reset();
+	                            DrawQueue.Enqueue(() => screen.draw(p));
+	                        });
+						}
 						// ballTimer.Change(0, Opts.ball_delay);
 						ballTimer.Enabled = true; // ballIsRunning = true;
-                    });
+                    }, ctoken);
                 }
             }
         }
