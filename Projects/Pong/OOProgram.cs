@@ -115,16 +115,22 @@ if(modified || opt.save_to_xml != ""){
 	var yn = Prompt.Select<string>(o => o.WithMessage("Save parameters to XML file?")
                                           .WithItems(new[] { "yes", "no" })
                                           .WithDefaultValue("no"));
-	if(yn == "yes"){
-		if (opt.save_to_xml == "") {
-			var filename = Prompt.Input<string>(o => o.WithMessage("Options XML filename:")
-			.WithDefaultValue(Options.XmlName));
-			opt.SaveXML(filename);
-		} else
-			opt.SaveXML(opt.save_to_xml);
-		Debug.WriteLine($"Saving options to XML file \"{opt.save_to_xml}\"."); 
-	}
+    if (yn == "yes") {
+        try {
+            if (opt.save_to_xml == "") {
+                var filename = Prompt.Input<string>(o => o.WithMessage("Options XML filename:")
+                .WithDefaultValue(Options.XmlName));
+                opt.save_to_xml = filename;
+                opt.SaveXML();
+            }
+            else
+                opt.SaveXML();
+            Debug.WriteLine($"Saving options to XML file \"{opt.save_to_xml}\".");
+        }
+        catch (IOException ex) {
+            Console.WriteLine(ex.Message + "\nError in saving file:" + opt.save_to_xml);
+        }
+    }
 }
-
 Console.CursorVisible = true;
 
