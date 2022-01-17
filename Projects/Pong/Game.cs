@@ -1,4 +1,6 @@
-using System.Threading;
+// using System.Threading;
+using System.Timers;
+
 
 public class Game {
 	public Ball Ball;
@@ -17,7 +19,8 @@ public class Game {
 	bool ballIsRunning;
 	TimeSpan opponentInputDelay;
 	TimeSpan ballDelay;
-	int[] Points = {3, 3}; // self, opponent
+	public Points score = new(3, 3);
+	// int[] Points = {3, 3}; // self, opponent
 	Queue<Action> DrawQueue = new();
 	int newBallDelay = 800;
 	public Options Opts{get;init;}
@@ -66,16 +69,17 @@ public class Game {
 		screen.drawWalls();
 		screen.draw(selfPadl);
 		screen.draw(oppoPadl);
-
-
+		ballTimer = new Timer(Opts.ball_delay);//o => do_ball(o), null, 0, Opts.ball_delay);
+		ballTimer.AutoReset = true;
 	}
 
-	public Points Run(){
+	public void Run(){
 		opponentStopwatch.Start();
-		ballStopwatch.Start();
-		ballTimer = new Timer(o => do_ball(o), null, 0, Opts.ball_delay);
-		ballIsRunning = true;
-	while(Points.Min() > 0) {
+		// ballStopwatch.Start();
+		ballTimer.Elapsed += do_ball;
+		ballTimer.Enabled = true;
+		// ballIsRunning = true;
+	while(score.Min > 0) {
 		int react;
 		if (Console.KeyAvailable) {
 			System.ConsoleKey key = Console.ReadKey(true).Key;
@@ -91,45 +95,7 @@ public class Game {
 			while(Console.KeyAvailable) // clear over input
 				Console.ReadKey(true);
 		}
-		/* if(ballStopwatch.IsRunning && ballStopwatch.Elapsed > ballDelay){
-			var old_dy = Ball.dY;
-			var isBallMoved = screen.drawBall(); // screen.Ball.Move();
-            if (isBallMoved) {
-				bool doReset = false;
-				var offsets = Ball.offsets;
-                if (old_dy < 0 && offsets.y <= Ball.YOffset.Min) {
-                    var selfPadlStart = selfPadl.Offset.Value;
-                    var selfPadlEnd = selfPadlStart + selfPadl.Width + 0;
-                    if (!(selfPadlStart..selfPadlEnd).Contains(offsets.x)) {
-						--Points[0];
-						doReset = true;
-                    }
-                }
-                else if (old_dy > 0 && offsets.y >= Ball.YOffset.Max) {
-                    var PadlStart = oppoPadl.Offset.Value;
-                    var PadlEnd = PadlStart + oppoPadl.Width;
-                    if (!(PadlStart..PadlEnd).Contains(offsets.x)) {
-						--Points[1];
-						doReset = true;
-                    }
-                }
-				if (doReset) {
-					ballStopwatch.Stop();
-					Task.Run(()=> {
-						screen.resetBall();
-						Array.ForEach(screen.Paddles, (p)=> {
-							p.Reset();
-							DrawQueue.Enqueue( () => screen.draw(p) );
-						});
-						Task.Delay(newBallDelay).Wait();
-						ballStopwatch.Restart();
-					});
-					continue;
-				}
-            }
-			ballStopwatch.Restart();
-		} */
-		if(ballIsRunning && opponentStopwatch.IsRunning && opponentStopwatch.Elapsed > opponentInputDelay){
+		if(ballTimer.Enabled && opponentStopwatch.IsRunning && opponentStopwatch.Elapsed > opponentInputDelay){
 			var diff = screen.Ball.offsets.x - (oppoPadl.Offset.Value + oppoPadl.Width / 2);
 			if (Math.Abs(diff) > 1){ // know when diff. is 2
 				opponentStopwatch.Stop();
@@ -151,10 +117,10 @@ public class Game {
 		}
 	}
 	exit:
-	return new Points(self: Points[0], opponent: Points[1]);
-        void do_ball(object obj) {
-			if(!ballIsRunning)
-				return;
+	ballTimer.Enabled = false;
+	return; // new Points(self: Points[0], opponent: Points[1]);
+        void do_ball(object obj, ElapsedEventArgs eeas) {
+			// if(!ballIsRunning) return;
             // if(ballStopwatch.IsRunning && ballStopwatch.Elapsed > ballDelay){
             var old_dy = Ball.dY;
             var isBallMoved = screen.doBall(DrawQueue); // screen.Ball.Move();
@@ -165,7 +131,7 @@ public class Game {
                     var selfPadlStart = selfPadl.Offset.Value;
                     var selfPadlEnd = selfPadlStart + selfPadl.Width + 0;
                     if (!(selfPadlStart..selfPadlEnd).Contains(offsets.x)) {
-                        --Points[0];
+                        --score.Self; // Points[0];
                         doReset = true;
                     }
                 }
@@ -173,14 +139,14 @@ public class Game {
                     var PadlStart = oppoPadl.Offset.Value;
                     var PadlEnd = PadlStart + oppoPadl.Width;
                     if (!(PadlStart..PadlEnd).Contains(offsets.x)) {
-                        --Points[1];
+                        --score.Opponent; // Points[1];
                         doReset = true;
                     }
                 }
                 if (doReset) {
                     screen.HideBall(DrawQueue);
-					ballTimer.Change(Timeout.Infinite, Timeout.Infinite);
-					ballIsRunning = false;
+					ballTimer.Enabled = false; // Change(Timeout.Infinite, Timeout.Infinite);
+					// ballIsRunning = false;
                     Task.Run(() => {
                         screen.ResetBall(DrawQueue);
                         Array.ForEach(screen.Paddles, (p) => {
@@ -188,8 +154,8 @@ public class Game {
                             DrawQueue.Enqueue(() => screen.draw(p));
                         });
                         Task.Delay(newBallDelay).Wait();
-						ballTimer.Change(0, Opts.ball_delay);
-						ballIsRunning = true;
+						// ballTimer.Change(0, Opts.ball_delay);
+						ballTimer.Enabled = true; // ballIsRunning = true;
                     });
                 }
             }
@@ -199,8 +165,8 @@ public class Game {
 }
 
 public class Points{
-	public int Self{get; init;} 
-	public int Opponent	{get; init;}
+	public int Self{get; set;} 
+	public int Opponent	{get; set;}
 	public Points(int self, int opponent) {
 		Self = self;
 		Opponent = opponent;
@@ -209,6 +175,7 @@ public class Points{
 		Self = 0;
 		Opponent = 0;
 	}
+	public int Min => Self < Opponent ? Self : Opponent;
 	public static void SSaveXML(Points[] ppoints, string save_to_xml) {
         System.Xml.Serialization.XmlSerializer serializer = new (typeof(Points[]));
         using(System.IO.StreamWriter writer = new(save_to_xml, false, new System.Text.UTF8Encoding(false))){
