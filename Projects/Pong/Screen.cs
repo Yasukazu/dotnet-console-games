@@ -18,31 +18,33 @@ public class Screen : OnScreen {
 	public int EndOfLines {get{return Lines.Length - 1;}}
 	public BitArray[] Lines {get; private set;} // [h][w]
 	// Gonsole console;
-	Action<int, int> setCursorPosition;
-	public Screen(int x = 80, int y = 24, bool rotate = false) {
+	// Action<int, int> setCursorPosition;
+	IConsole Console;
+	public Screen(IConsole console, int x = 80, int y = 24, bool rotate = false) {
+		Console = console;
 		(w, h) = OnScreen.init(x, y);
 		dim = new(w, h);
 		isRotated = rotate;
 		// console = isRotated ? new VGonsole() : HGonsole();
-		setCursorPosition = isRotated ? (x, y) => Console.SetCursorPosition(y, x) : (x, y) => Console.SetCursorPosition(x, y);
+		// setCursorPosition = isRotated ? (x, y) => Console.SetCursorPosition(y, x) : (x, y) => Console.SetCursorPosition(x, y);
 		Lines = new BitArray[isRotated ? w : h];
         // for(int i = 0; i < (rotate ? w :h); ++i) buffer[i] = new BitArray(rotate ? h :w);
         RedrawImage = isRotated ? (line, new_buff, c) =>
         {
             var ad = Lines[line].ToAddedDeleted(new_buff);
-            VPutCasBitArray(line, c, ad.Added);
-            VPutCasBitArray(line, BlankChar, ad.Deleted);
+            VPutCasBitArray(Console, line, c, ad.Added);
+            VPutCasBitArray(Console, line, BlankChar, ad.Deleted);
         }
         : (line, new_buff, c) =>
         {
             var ad = Lines[line].ToAddedDeleted(new_buff);
-            HPutCasBitArray(line, c, ad.Added);
-            HPutCasBitArray(line, BlankChar, ad.Deleted);
+            HPutCasBitArray(Console, line, c, ad.Added);
+            HPutCasBitArray(Console, line, BlankChar, ad.Deleted);
         };
         DrawImage = isRotated ? (line, buff, c) =>
-            VPutCasBitArray(line, c, buff)
+            VPutCasBitArray(Console, line, c, buff)
         : (line, buff, c) =>
-            HPutCasBitArray(line, c, buff);
+            HPutCasBitArray(Console, line, c, buff);
 
 	}
 
@@ -79,48 +81,53 @@ public class Screen : OnScreen {
 		// Lines[n] = image;
 	}
 
-	public static void PutCasBitArray(Boolean rot, int line, char c, BitArray bb) {
+	public static void PutCasBitArray(IConsole Console, Boolean rot, int line, char c, BitArray bb) {
 		if(rot)
-			VPutCasBitArray(line, c, bb);
+			VPutCasBitArray(Console, line, c, bb);
 		else
-			HPutCasBitArray(line, c, bb);
+			HPutCasBitArray(Console, line, c, bb);
 	}
 	public void drawImage(int line, BitArray bb, char c) {
 		// Debug.Write(bb.renderImage());
 		for(int i = 0; i < bb.Length; ++i)
             if (bb[i]) {
 				// if(isRotated) SetCursorPosition(i, line); else
-                SetCursorPosition(i, line);
-                Console.Write(c);
+                Console.PrintAt(i, line, c);
             }
     }
 
-	public static void VPutCasBitArray(int x, char c, BitArray bb) {
+	public static void VPutCasBitArray(IConsole Console, int x, char c, BitArray bb) {
 		Debug.Write(bb.renderImage());
 		for(int i = 0; i < bb.Length; ++i)
             if (bb[i])
-            {
-                Console.SetCursorPosition(x, i);
-                Console.Write(c);
-            }
+                Console.PrintAt(x, i, c);
     }
 
 	// public void HDrawImage(Side side, BitArray image){ HPutCasBitArray(SideToLine(side), SideToChar(side), image); }
-	public static void HPutCasBitArray(int y, char c, BitArray bb) {
+	public static void HPutCasBitArray(IConsole Console, int y, char c, BitArray bb) {
         for (int i = 0; i < bb.Length; ++i)
-            if (bb[i])
-            {
-                Console.SetCursorPosition(i, y);
-                Console.Write(c);
-            }
+            if (bb[i]) {
+                Console.PrintAt(i, y, c);
+			}
     }
 
-    public void SetCursorPosition(int x, int y){
+	(int x, int y) convertRotation(int x, int y){
 		if(isRotated)
 			(y, x) = (x, y);
 		else {
 			y = h - 1 -y;
 		}
-        Console.SetCursorPosition(x, y);
+		return (x, y);
+	}
+    public void setCursorPosition(int x, int y){
+		if(isRotated)
+			(y, x) = (x, y);
+		else {
+			y = h - 1 -y;
+		}
+        System.Console.SetCursorPosition(x, y);
     }
+	public void PrintAt(int x, int y, char c){
+		Console.PrintAt(x, y, c);
+	}
 }

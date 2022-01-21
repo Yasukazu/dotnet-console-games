@@ -7,6 +7,7 @@ global using System.Diagnostics;
 global using CommandLineParser; // Original source code: https://github.com/wertrain/command-line-parser-cs (Version 0.1)
 global using System.Threading.Tasks;
 global using System.IO;
+global using Konsole;
 using Sharprompt;
 using Sharprompt.Fluent;
 
@@ -16,6 +17,7 @@ using Sharprompt.Fluent;
 // Trace.Listeners.Add(myWriter);
 // Debug.Write("myWriter is added to Trace.Listeners.  OOProgram start.");
 // var _rotation = 90; // Rotation.Horizontal;
+// Environment.Exit(0);
 var clargs = Environment.GetCommandLineArgs();
 var pArgs = clargs[1..];
 ParserResult<Options> parseResult = Parser.Parse<Options>(pArgs);
@@ -36,41 +38,24 @@ Options opt = Options.MergeXML(xopt, copt);
 
 // modify opt by last games
  var points_xml_file = @"points.xml" ;
-/*
-if(File.Exists(points_xml_file)){
-	Debug.WriteLine("Opening: " + points_xml_file);
-	Points[] pp = Points.LLoadXML(points_xml_file);
-	var selfPoints = pp.Select(x => x.Self).Sum();
-	var oppoPoints = pp.Select(x => x.Opponent).Sum();
-	if (selfPoints > oppoPoints){
-		var minus = 10;
-		Debug.WriteLine("oppo delay -{minus}");
-		opt.oppo_delay -= minus;
-	}
-	else if (selfPoints < oppoPoints){
-		var plus = 50;
-		Debug.WriteLine("ball delay +{plus}");
-		opt.ball_delay += plus;
-	}
-}
-*/
-/*
-Rotation rot = _rotation switch {
-	0 => Rotation.Horizontal, 90 => Rotation.Vertical,
-	_ => throw new ArgumentException("Rotation must be one of {0, 90}.")
-}; */
+
 // adjust with environment screen size
 (int width, int height) = OnScreen.init(opt.width, opt.height);
+// training of konsole starts here..
+// Console.CursorVisible = false; // Hide cursor
+Console.Clear(); // Clear console absolutely.
+var gameBox = Window.OpenBox("game", 0, 0, width, height/2);
+var msgBox = Window.OpenBox("message", 0, height/2, width, height/2);
 
 const int game_repeat = 3;
 Points[] ppoints = new Points[game_repeat];
 Game game;
-Console.Write("Hit any key to start:");
+msgBox.WriteLine("Hit any key to start:");
 bool modified = false;
 for ( int i = 0; i < game_repeat; ++i){
-	game = new Game(opt with {width = width, height = height}); // speed_ratio, screen_w, screen_h, paddle_width, rot, delay, oppo_delay, ball_delay, ball_angle);
+	game = new Game(gameBox, opt with {width = width, height = height}); // speed_ratio, screen_w, screen_h, paddle_width, rot, delay, oppo_delay, ball_delay, ball_angle);
 	game.Run();
-    game.screen.SetCursorPosition(0, 0);
+    game.screen.PrintAt(0, 0, ' '); // screen.SetCursorPosition(0, 0);
 
 	string msg =
 	game.score switch {
@@ -134,3 +119,51 @@ if(modified || opt.save_to_xml != ""){
 }
 Console.CursorVisible = true;
 
+/* public class SafeBox : IConsole {
+    public int WindowHeight => box.WindowHeight;
+    public int WindowWidth => box.WindowWidth;
+    protected IConsole box {get; init;}
+    public SafeBox(string title, int atX, int atY, int withX, int withY){
+        box = Window.OpenBox(title, atX, atY, withX, withY);
+    }
+    public void PrintAt(int x, int y, char c){
+        if(x < 0)
+            throw new LeftOutBoxException();
+        else if( x >= box.WindowWidth)
+            throw new RightOutBoxException();
+         else if( y < 0 )
+            throw new UpOutBoxException();
+           else if( y >= box.WindowHeight)
+            throw new DownOutBoxException();
+        box.PrintAt(x, y, c);
+    }
+} */
+public interface ISafeConsole : IConsole {
+    public void PutAt(int x, int y, char c){
+        if(x < 0)
+            throw new LeftOutBoxException();
+        else if( x >= WindowWidth)
+            throw new RightOutBoxException();
+         else if( y < 0 )
+            throw new UpOutBoxException();
+           else if( y >= WindowHeight)
+            throw new DownOutBoxException();
+        PrintAt(x, y, c);
+    }
+}
+
+/* public class SafeMsgBox : SafeBox {
+	public SafeMsgBox(string title, int atX, int atY, int withX, int withY) : 
+	base(title, atX, atY, withX, withY) {
+
+	}
+	public void WriteLine(string msg){
+		box.WriteLine(msg);
+	}
+} */
+
+public class OutOfBoxException : ArgumentOutOfRangeException {}
+public class LeftOutBoxException : OutOfBoxException {}
+public class RightOutBoxException : OutOfBoxException {}
+public class UpOutBoxException : OutOfBoxException {}
+public class DownOutBoxException : OutOfBoxException {}

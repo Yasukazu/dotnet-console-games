@@ -27,14 +27,15 @@ public class Game {
 	int newBallDelay = 800;
 	public Options Opts{get;init;}
 
-	public Game(Options opt) {
-
+	public IConsole Console{get;init;}
+	public Game(IConsole given_console, Options opt) {
+		Console = given_console;
 		Opts = opt;
 		Rotation rot = opt.rotation switch {
 			0 => Rotation.Horizontal, 90 => Rotation.Vertical,
 			_ => throw new ArgumentException("Rotation must be one of {0, 90}.")
 		};
-		screen = new(opt.width, opt.height, rot == Rotation.Vertical ? true : false);
+		screen = new(given_console, opt.width, opt.height, rot == Rotation.Vertical ? true : false);
 		if (opt.paddle > screen.SideToSide / 2)
 			opt.paddle = screen.SideToSide / 2;
 		selfPadl = new(range: screen.PaddleRange, width: opt.paddle, manipDict);
@@ -57,12 +58,12 @@ public class Game {
 		var ball_stride = Ball.Stride;
 		ballDelay = TimeSpan.FromMilliseconds(Math.Round((float)opt.ball_delay / Ball.Stride));
 	// pdl = new VPaddle(screen.w, paddle_width); // NestedRange(0..(width / 3), 0..width);
-	Console.CancelKeyPress += delegate {
-		Console.Clear();
-		Console.CursorVisible = true;
+	System.Console.CancelKeyPress += delegate {
+		System.Console.Clear();
+		System.Console.CursorVisible = true;
 	};
-	Console.CursorVisible = false; // hide cursor
-	Console.Clear();
+	// Console.CursorVisible = false; // hide cursor
+	// Console.Clear();
 	Debug.WriteLine($"screen.isRotated={screen.isRotated}");
 	Debug.WriteLine($"selfPadl range: 0..{selfPadl.Offset.Max + selfPadl.Width + 1}");
 	Debug.Write($"screen.SideToSide={screen.SideToSide}, ");
@@ -83,8 +84,8 @@ public class Game {
 		ballTimer.Enabled = true; // ballIsRunning = true;
 	while(score.Min > 0) {
 		int react;
-		if (Console.KeyAvailable) {
-			System.ConsoleKey key = Console.ReadKey(true).Key;
+		if (System.Console.KeyAvailable) {
+			System.ConsoleKey key = System.Console.ReadKey(true).Key;
 			if (key == ConsoleKey.Escape){
 				tokenSource.Cancel();
 				goto exit;
@@ -96,8 +97,8 @@ public class Game {
 				}
 			}
 			// else if (pdl.manipDict.ContainsKey(key)) moved = pdl.manipDict[key]() != 0;
-			while(Console.KeyAvailable) // clear over input
-				Console.ReadKey(true);
+			while(System.Console.KeyAvailable) // clear over input
+				System.Console.ReadKey(true);
 		}
 		if(ballTimer.Enabled && opponentStopwatch.IsRunning && opponentStopwatch.Elapsed > opponentInputDelay){
 			var diff = screen.Ball.offsets.x - (oppoPadl.Offset.Value + oppoPadl.Width / 2);

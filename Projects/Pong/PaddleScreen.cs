@@ -37,13 +37,15 @@ public class PaddleScreen : Screen {
 	public Ball Ball;
 	public Paddle[] Paddles = new Paddle[2];
 	List<ScreenDrawItem> DrawItems = new();
-	public PaddleScreen(int x, int y, bool rotate) : base(x,y,rotate) {
+	IConsole Console;
+	public PaddleScreen(IConsole console, int x, int y, bool rotate) : base(x,y,rotate) {
 		AwayLineNum = this.EndOfLines; // Lines.Length - 1;
 		// for (int i = 0; i < Walls.Length; ++i) Walls[i] = new Wall(1..EndOfLines);
 		// WallLocations = {0, EndOfLines - 1};
 		SideWalls[0] = new SideWall(WallSide.Left, new Wall(1..EndOfLines));
 		SideWalls[1] = new SideWall(WallSide.Right, new Wall(1..EndOfLines));
 		Ball = new(0..SideToSide, 0..HomeToAway, 0);
+		Console = console;
 	}
 	public void draw(Paddle padl, bool replace_buffer = true) {
 		var side = padl.Side;
@@ -63,10 +65,8 @@ public class PaddleScreen : Screen {
 		var offsets = Ball.offsets;
 		if (Ball.Move()){
 			var new_offsets = Ball.offsets;
-			SetCursorPosition(offsets.x, offsets.y);
-			Console.Write((char)CharCode.SPC);
-			SetCursorPosition(new_offsets.x, new_offsets.y);
-			Console.Write(Ball.DispChar);
+			Console.PrintAt(offsets.x, offsets.y, (char)CharCode.SPC); 
+			Console.PrintAt(new_offsets.x, new_offsets.y, Ball.DispChar);
 			return true;
 		}
 		return false;
@@ -76,10 +76,8 @@ public class PaddleScreen : Screen {
 		if (Ball.Move()){
 			var new_offsets = Ball.offsets;
 			drawQueue.Enqueue(()=> {
-				SetCursorPosition(offsets.x, offsets.y);
-				Console.Write((char)CharCode.SPC);
-				SetCursorPosition(new_offsets.x, new_offsets.y);
-				Console.Write(Ball.DispChar);
+				Console.PrintAt(offsets.x, offsets.y, (char)CharCode.SPC);
+				Console.PrintAt(new_offsets.x, new_offsets.y, Ball.DispChar);
 			});
 			return true;
 		}
@@ -88,35 +86,30 @@ public class PaddleScreen : Screen {
 	public void HideBall(Queue<Action> drawQueue) {
 		var offsets = Ball.offsets;
 		drawQueue.Enqueue(()=>{
-			SetCursorPosition(offsets.x, offsets.y);
-			Console.Write((char)CharCode.SPC);
+			Console.PrintAt(offsets.x, offsets.y, (char)CharCode.SPC);
 		});
 	}
 	public void ResetBall(Queue<Action> drawQueue) {
 		Ball.Reset();
 		var offsets = Ball.offsets;
 		drawQueue.Enqueue(()=>{
-			SetCursorPosition(offsets.x, offsets.y);
-			Console.Write(Ball.DispChar);
+			Console.PrintAt(offsets.x, offsets.y, Ball.DispChar);
 		});
 	}
 
 	public void resetBall() {
 		var offsets = Ball.offsets;
-		SetCursorPosition(offsets.x, offsets.y);
-		Console.Write((char)CharCode.SPC);
+		Console.PrintAt(offsets.x, offsets.y, (char)CharCode.SPC);
 		Ball.Reset();
 		offsets = Ball.offsets;
-		SetCursorPosition(offsets.x, offsets.y);
-		Console.Write(Ball.DispChar);
+		Console.PrintAt(offsets.x, offsets.y, Ball.DispChar);
 	}
 	public void drawWalls() {
 		char c = isRotated ? '-' : '|';
 		void drawVLine(int fromLeft) {
 			Debug.WriteLine($"Walls y: from 1 to {HomeToAway}.");
 			for (int y = 1; y <= HomeToAway; ++y){
-				SetCursorPosition(fromLeft, y);
-				Console.Write(c);
+				Console.PrintAt(fromLeft, y, c);
 			}
 		}
 		drawVLine(0);
