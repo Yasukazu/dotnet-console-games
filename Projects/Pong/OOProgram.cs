@@ -36,41 +36,46 @@ Options opt = Options.MergeXML(xopt, copt);
 
 // modify opt by last games
  var points_xml_file = @"points.xml" ;
-/*
-if(File.Exists(points_xml_file)){
-	Debug.WriteLine("Opening: " + points_xml_file);
-	Points[] pp = Points.LLoadXML(points_xml_file);
-	var selfPoints = pp.Select(x => x.Self).Sum();
-	var oppoPoints = pp.Select(x => x.Opponent).Sum();
-	if (selfPoints > oppoPoints){
-		var minus = 10;
-		Debug.WriteLine("oppo delay -{minus}");
-		opt.oppo_delay -= minus;
-	}
-	else if (selfPoints < oppoPoints){
-		var plus = 50;
-		Debug.WriteLine("ball delay +{plus}");
-		opt.ball_delay += plus;
-	}
-}
-*/
-/*
-Rotation rot = _rotation switch {
-	0 => Rotation.Horizontal, 90 => Rotation.Vertical,
-	_ => throw new ArgumentException("Rotation must be one of {0, 90}.")
-}; */
-// adjust with environment screen size
-(int width, int height) = OnScreen.init(opt.width, opt.height);
 
-const int game_repeat = 3;
+// adjust with environment screen size
+{ // (width, height) = OnScreen.init(opt.width, opt.height);
+    opt.width = opt.width > 0 ? opt.width : Math.Min(opt.width, System.Console.WindowWidth);
+    opt.height = opt.height > 0 ? opt.height : Math.Min(opt.height, System.Console.WindowHeight);
+}
+int game_repeat = 3;
+string? game_env_repeat_str = Environment.GetEnvironmentVariable("GAME_PONG_REPEAT");
+if(game_env_repeat_str != null){
+    try {
+        game_repeat = Convert.ToInt32(game_env_repeat_str);
+    }
+    catch(Exception ex) {
+        Debug.WriteLine("repeat conversion failed:" + ex.Message);
+    }
+}
+
 Points[] ppoints = new Points[game_repeat];
+
+Points env_scores = new(0,0);
+string? game_env_scores_str = Environment.GetEnvironmentVariable("GAME_PONG_SCORES");
+if(game_env_scores_str != null){
+    try {
+        var scores_s = game_env_scores_str.Split(':');
+        if(scores_s.Length >= 2){
+            env_scores = new(Convert.ToInt32(scores_s[0]), Convert.ToInt32(scores_s[1]));
+        }
+    }
+    catch(Exception ex) {
+        Debug.WriteLine("scores conversion failed:" + ex.Message);
+    }
+}
+
 Game game;
-Console.Write("Hit any key to start:");
 bool modified = false;
 for ( int i = 0; i < game_repeat; ++i){
-	game = new Game(opt with {width = width, height = height}); // speed_ratio, screen_w, screen_h, paddle_width, rot, delay, oppo_delay, ball_delay, ball_angle);
-	game.Run();
-    game.screen.SetCursorPosition(0, 0);
+    Console.Clear(); //Write("Hit any key to start:");
+	game = new Game(opt); // speed_ratio, screen_w, screen_h, paddle_width, rot, delay, oppo_delay, ball_delay, ball_angle);
+	game.Run(env_scores with {Self = env_scores.Self, Opponent = env_scores.Opponent});
+    Console.SetCursorPosition(0, opt.height);
 
 	string msg =
 	game.score switch {
