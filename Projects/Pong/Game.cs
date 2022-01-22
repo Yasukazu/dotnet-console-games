@@ -2,7 +2,7 @@
 using System.Timers;
 using System.Threading;
 using System.Threading.Tasks;
-
+#nullable enable
 
 public class Game {
 	public Ball Ball;
@@ -75,7 +75,9 @@ public class Game {
 		ballTimer.AutoReset = true;
 	}
 
-	public void Run(){
+	public void Run(Points? given_score = null){
+		if(given_score != null)
+			score = given_score;
 		CancellationTokenSource tokenSource = new();
 		var ctoken = tokenSource.Token;
 		opponentStopwatch.Start(); // ballStopwatch.Start();
@@ -172,7 +174,7 @@ public class Game {
 
 }
 
-public class Points{
+public record Points{
 	public int Self{get; set;} 
 	public int Opponent	{get; set;}
 	public Points(int self, int opponent) {
@@ -190,12 +192,13 @@ public class Points{
             serializer.Serialize(writer, ppoints);
         }
     }
-	public static Points[] LLoadXML(string load_from_xml) {
+	public static Points[]? LLoadXML(string load_from_xml) {
         System.Xml.Serialization.XmlSerializer serializer = new (typeof(Points[]));
-		Points[] ppoints;
         using(System.IO.StreamReader reader = new(load_from_xml)){
-			ppoints = (Points[])serializer.Deserialize(reader);
+			var obj = serializer.Deserialize(reader);
+			if(obj != null)
+				return (Points[])obj;
         }
-		return ppoints;
+		return null;
     }
 }
