@@ -12,17 +12,17 @@ public class Screen : OnScreen {
 	public Action<int, BitArray, char> DrawImage;
 	public Action<int, BitArray, char> RedrawImage; // (Line, this_array, new_array, c='+')
 	public virtual bool isRotated {get; init;} // 90 degree
-	protected int w {get; init;}
-	protected int h {get; init;}
+	protected int w => Console.WindowWidth;
+	protected int h => Console.WindowHeight;
 	public Dimention dim {get; init;}
 	public int EndOfLines {get{return Lines.Length - 1;}}
 	public BitArray[] Lines {get; private set;} // [h][w]
 	// Gonsole console;
 	// Action<int, int> setCursorPosition;
-	IConsole Console;
-	public Screen(IConsole console, int x = 80, int y = 24, bool rotate = false) {
+	public IConsole Console {get;init;}
+	public Screen(IConsole console, bool rotate = false) { // rotate needs to be fixed!
 		Console = console;
-		(w, h) = OnScreen.init(x, y);
+		// (w, h) = OnScreen.init(x, y);
 		dim = new(w, h);
 		isRotated = rotate;
 		// console = isRotated ? new VGonsole() : HGonsole();
@@ -48,9 +48,9 @@ public class Screen : OnScreen {
 
 	}
 
-	public Screen() {
-		(w, h) = OnScreen.init();
-	}
+	/* public Screen() {
+		var (w, h) = OnScreen.init();
+	} */
 
 	public BitArray [] new_buffer() {
 		var old_buffer = Lines;

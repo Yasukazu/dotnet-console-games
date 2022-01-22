@@ -2,7 +2,7 @@
 using System.Timers;
 using System.Threading;
 using System.Threading.Tasks;
-
+#nullable enable
 
 public class Game {
 	public Ball Ball;
@@ -10,7 +10,7 @@ public class Game {
 	volatile public SelfPaddle selfPadl;
 	volatile public OpponentPaddle oppoPadl;
 	// public Paddle[] Paddles = new Paddle[2]; // {selfPadl, oppoPadl};
-	public BitArray SelfOutputImage, OpponentOutputImage;
+	//public BitArray SelfOutputImage, OpponentOutputImage;
 	// public int PaddleWidth {get; init;}
 	public Dictionary<System.ConsoleKey, Func<int>> manipDict = new();	
 	public Rotation rotation {get; init;}
@@ -18,10 +18,10 @@ public class Game {
 	Stopwatch opponentStopwatch = new();
 	Stopwatch ballStopwatch = new();
 	System.Timers.Timer ballTimer;
-	bool ballIsRunning;
+	// bool ballIsRunning;
 	TimeSpan opponentInputDelay;
 	TimeSpan ballDelay;
-	public Points score = new(3, 3);
+	public Points score{get; private set;}
 	// int[] Points = {3, 3}; // self, opponent
 	Queue<Action> DrawQueue = new();
 	int newBallDelay = 800;
@@ -35,7 +35,7 @@ public class Game {
 			0 => Rotation.Horizontal, 90 => Rotation.Vertical,
 			_ => throw new ArgumentException("Rotation must be one of {0, 90}.")
 		};
-		screen = new(given_console, opt.width, opt.height, rot == Rotation.Vertical ? true : false);
+		screen = new(given_console, rot == Rotation.Vertical ? true : false);
 		if (opt.paddle > screen.SideToSide / 2)
 			opt.paddle = screen.SideToSide / 2;
 		selfPadl = new(range: screen.PaddleRange, width: opt.paddle, manipDict);
@@ -74,9 +74,12 @@ public class Game {
 		screen.draw(oppoPadl);
 		ballTimer = new (Opts.ball_delay);//o => do_ball(o), null, 0, Opts.ball_delay);
 		ballTimer.AutoReset = true;
+		score =  new(3, 3);  // initial Score
 	}
 
-	public void Run(){
+	public void Run(Points? initial_score = null){
+		if (initial_score != null)
+			score = initial_score;
 		CancellationTokenSource tokenSource = new();
 		var ctoken = tokenSource.Token;
 		opponentStopwatch.Start(); // ballStopwatch.Start();
@@ -173,7 +176,7 @@ public class Game {
 
 }
 
-public class Points{
+public record Points{
 	public int Self{get; set;} 
 	public int Opponent	{get; set;}
 	public Points(int self, int opponent) {
@@ -191,12 +194,12 @@ public class Points{
             serializer.Serialize(writer, ppoints);
         }
     }
-	public static Points[] LLoadXML(string load_from_xml) {
+	public static Points[]? LLoadXML(string load_from_xml) {
         System.Xml.Serialization.XmlSerializer serializer = new (typeof(Points[]));
 		Points[] ppoints;
         using(System.IO.StreamReader reader = new(load_from_xml)){
-			ppoints = (Points[])serializer.Deserialize(reader);
+			var deserialized = serializer.Deserialize(reader);
+			return (deserialized != null) ? (Points[])deserialized : null;
         }
-		return ppoints;
     }
 }

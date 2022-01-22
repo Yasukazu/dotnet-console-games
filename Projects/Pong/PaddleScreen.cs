@@ -37,15 +37,15 @@ public class PaddleScreen : Screen {
 	public Ball Ball;
 	public Paddle[] Paddles = new Paddle[2];
 	List<ScreenDrawItem> DrawItems = new();
-	IConsole Console;
-	public PaddleScreen(IConsole console, int x, int y, bool rotate) : base(x,y,rotate) {
+	// IConsole Console;
+	public PaddleScreen(IConsole console, bool rotate) : base(console, rotate) {
 		AwayLineNum = this.EndOfLines; // Lines.Length - 1;
 		// for (int i = 0; i < Walls.Length; ++i) Walls[i] = new Wall(1..EndOfLines);
 		// WallLocations = {0, EndOfLines - 1};
 		SideWalls[0] = new SideWall(WallSide.Left, new Wall(1..EndOfLines));
 		SideWalls[1] = new SideWall(WallSide.Right, new Wall(1..EndOfLines));
 		Ball = new(0..SideToSide, 0..HomeToAway, 0);
-		Console = console;
+		// Console = console;
 	}
 	public void draw(Paddle padl, bool replace_buffer = true) {
 		var side = padl.Side;

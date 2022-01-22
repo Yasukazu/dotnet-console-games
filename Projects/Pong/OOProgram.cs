@@ -40,21 +40,49 @@ Options opt = Options.MergeXML(xopt, copt);
  var points_xml_file = @"points.xml" ;
 
 // adjust with environment screen size
-(int width, int height) = OnScreen.init(opt.width, opt.height);
 // training of konsole starts here..
 // Console.CursorVisible = false; // Hide cursor
 Console.Clear(); // Clear console absolutely.
-var gameBox = Window.OpenBox("game", 0, 0, width, height/2);
-var msgBox = Window.OpenBox("message", 0, height/2, width, height/2);
+const int msgBoxHeight = 3;
+IConsole gameBox, msgBox;
+{ // (width, height) = OnScreen.init(opt.width, opt.height);
+    int width = opt.width = opt.width > 0 ? opt.width : Math.Min(opt.width, System.Console.WindowWidth);
+    int height = opt.height = opt.height > 0 ? opt.height : Math.Min(opt.height, System.Console.WindowHeight);
+    msgBox = Window.OpenBox("message", 0, 0, width, msgBoxHeight);
+    gameBox = Window.OpenBox("game", 0, msgBoxHeight, width, height - msgBoxHeight);
+}
 
-const int game_repeat = 3;
+int game_repeat = 3;
+string? game_env_repeat_str = Environment.GetEnvironmentVariable("GAME_PONG_REPEAT");
+if(game_env_repeat_str != null){
+    try {
+        game_repeat = Convert.ToInt32(game_env_repeat_str);
+    }
+    catch(Exception ex) {
+        Debug.WriteLine("repeat conversion failed:" + ex.Message);
+    }
+}
 Points[] ppoints = new Points[game_repeat];
+Points env_scores = new(0,0);
+string? game_env_scores_str = Environment.GetEnvironmentVariable("GAME_PONG_SCORES");
+if(game_env_scores_str != null){
+    try {
+        var scores_s = game_env_scores_str.Split(':');
+        if(scores_s.Length >= 2){
+            env_scores = new(Convert.ToInt32(scores_s[0]), Convert.ToInt32(scores_s[1]));
+        }
+    }
+    catch(Exception ex) {
+        Debug.WriteLine("scores conversion failed:" + ex.Message);
+    }
+}
+
 Game game;
-msgBox.WriteLine("Hit any key to start:");
+msgBox.PrintAt(0, 0, 'E'); // WriteLine("Hit Esc key to end game:");
 bool modified = false;
 for ( int i = 0; i < game_repeat; ++i){
-	game = new Game(gameBox, opt with {width = width, height = height}); // speed_ratio, screen_w, screen_h, paddle_width, rot, delay, oppo_delay, ball_delay, ball_angle);
-	game.Run();
+	game = new Game(gameBox, opt); // speed_ratio, screen_w, screen_h, paddle_width, rot, delay, oppo_delay, ball_delay, ball_angle);
+	game.Run(env_scores != new Points(0,0) ? env_scores : null);
     game.screen.PrintAt(0, 0, ' '); // screen.SetCursorPosition(0, 0);
 
 	string msg =
