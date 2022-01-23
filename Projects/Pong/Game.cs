@@ -10,7 +10,7 @@ public class Game {
 	volatile public SelfPaddle selfPadl;
 	volatile public OpponentPaddle oppoPadl;
 	// public Paddle[] Paddles = new Paddle[2]; // {selfPadl, oppoPadl};
-	public BitArray SelfOutputImage, OpponentOutputImage;
+	// public BitArray SelfOutputImage, OpponentOutputImage;
 	// public int PaddleWidth {get; init;}
 	public Dictionary<System.ConsoleKey, Func<int>> manipDict = new();	
 	public Rotation rotation {get; init;}
@@ -103,7 +103,7 @@ public class Game {
 		}
 		if(ballTimer.Enabled && opponentStopwatch.IsRunning && opponentStopwatch.Elapsed > opponentInputDelay){
 			var diff = screen.Ball.offsets.x - (oppoPadl.Offset.Value + oppoPadl.Width / 2);
-			if (Math.Abs(diff) > 1){ // know when diff. is 2
+			if (Math.Abs(diff) > Opts.oppo_about){ // know when diff. is 2
 				opponentStopwatch.Stop();
 				Task.Run(()=> {
 					Task.Delay(opponentInputDelay).Wait();
