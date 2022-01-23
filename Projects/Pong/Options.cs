@@ -23,8 +23,10 @@ public record Options {
 	[Option('v', "save-to-XML", Required =false, HelpText = "Save options to XML file name. default ''(void).")]
 	public string save_to_xml {get; set;} = "";
 
-	[Option('l', "load-from-XML", Required =false, HelpText = "Load options from XML file name. default false.")]
+	[Option('l', "load-from-XML", Required =false, HelpText = "Load options from XML file name. default ''.")]
 	public string load_from_xml {get; set;} = "";
+	[Option('b', "opponent about", Required =false, HelpText = "opponent about at find difference. default 1")]
+	public int oppo_about {get; set;} = 1;
 	public static string XmlName = @"options.xml";
     public void SaveXML() {
         System.Xml.Serialization.XmlSerializer serializer = new (typeof(Options));
@@ -56,6 +58,7 @@ public record Options {
 			ball_angle = newo.ball_angle != defo.ball_angle ? newo.ball_angle : orgo.ball_angle, 
 			save_to_xml = newo.save_to_xml != defo.save_to_xml ? newo.save_to_xml : orgo.save_to_xml, 
 			load_from_xml = newo.load_from_xml != defo.load_from_xml ? newo.load_from_xml : orgo.load_from_xml, 
+			oppo_about = newo.oppo_about != defo.oppo_about ? newo.oppo_about : orgo.oppo_about, 
 		};
 		return ropts;
 	}
