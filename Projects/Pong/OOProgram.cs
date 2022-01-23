@@ -21,27 +21,28 @@ var pArgs = clargs[1..];
 ParserResult<Options> parseResult = Parser.Parse<Options>(pArgs);
 Options copt = parseResult.Value; // command
 // Load from XML file into options
+string? load_from_xml_file = copt.load_from_xml;
 Options? xopt = null;
-try {
-    xopt = (copt.load_from_xml != "") switch {
-        true => Options.LoadXML(copt.load_from_xml),
-        false => Options.LoadXML(Options.XmlName)
-    };
+if (load_from_xml_file == "") {
+    var env_xml_file = Environment.GetEnvironmentVariable("GAME_PONG_FILE_OPTIONS");
+    if (env_xml_file != null)
+        try {
+            xopt = Options.LoadXML(env_xml_file);
+        }
+        catch (IOException ex) {
+            Debug.WriteLine(env_xml_file + "]:Options XML file I/O Error:[" + ex.Message);
+        }
 }
-catch (IOException ex) {
-    Debug.WriteLine("Error opening " + ex.Message);
-}
-
-Options opt = Options.MergeXML(xopt, copt);
+Options opt = (xopt != null) ? Options.MergeXML(xopt, copt) : copt;
 
 // modify opt by last games
  var points_xml_file = @"points.xml" ;
 
 // adjust with environment screen size
-{ // (width, height) = OnScreen.init(opt.width, opt.height);
+ // (width, height) = OnScreen.init(opt.width, opt.height);
     opt.width = opt.width > 0 ? opt.width : Math.Min(opt.width, System.Console.WindowWidth);
     opt.height = opt.height > 0 ? opt.height : Math.Min(opt.height, System.Console.WindowHeight);
-}
+
 int game_repeat = 3;
 string? game_env_repeat_str = Environment.GetEnvironmentVariable("GAME_PONG_REPEAT");
 if(game_env_repeat_str != null){
@@ -74,7 +75,7 @@ bool modified = false;
 for ( int i = 0; i < game_repeat; ++i){
     Console.Clear(); //Write("Hit any key to start:");
 	game = new Game(opt); // speed_ratio, screen_w, screen_h, paddle_width, rot, delay, oppo_delay, ball_delay, ball_angle);
-	game.Run(env_scores with {Self = env_scores.Self, Opponent = env_scores.Opponent});
+	game.Run(env_scores with { });
     Console.SetCursorPosition(0, opt.height);
 
 	string msg =
