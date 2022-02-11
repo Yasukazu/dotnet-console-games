@@ -19,6 +19,8 @@ public class Ball // : ScreenDrawItem
 	public Slider YOffset{get; init;}
 	Random random = new();
 	int org_degree {get; init;}
+	public double Angle => Math.Atan2(dY, dX);
+
 	/// <summary>
 	/// itself has dX and dY
 	/// </summary>
@@ -31,7 +33,7 @@ public class Ball // : ScreenDrawItem
         if (degree == 0) {
             /* float randomFloat = (float)random.NextDouble() * 2f; dy = Math.Max(randomFloat, 1f - randomFloat);
              dx = 1f - dy; */
-			degree = random.Next(15) * (new int[]{1, -1}[random.Next(2)]);
+			degree = (random.Next(15) + 15) * (new int[]{1, -1}[random.Next(2)]);
         }
 		else
 			org_degree = degree;
