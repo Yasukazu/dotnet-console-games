@@ -104,12 +104,12 @@ for ( int i = 0; i < game_repeat; ++i){
     //Console.ReadKey();
 	ppoints[i] = game.score;
 	Options new_opts(Options opts) {
-		var new_oppo_delay = Prompt.Input<int>(o => o.WithMessage("opponent delay:").WithDefaultValue(opts.oppo_delay));
-		var new_speed = Prompt.Input<int>(o => o.WithMessage("self speed:").WithDefaultValue(opts.speed));
-		var new_oppo_speed = Prompt.Input<int>(o => o.WithMessage("opponent's speed:").WithDefaultValue(opts.oppo_speed));
 		var new_ball_delay = Prompt.Input<int>(o => o.WithMessage("ball delay:").WithDefaultValue(opts.ball_delay));
-		var new_delay = Prompt.Input<int>(o => o.WithMessage("delay(refresh rate):").WithDefaultValue(opts.delay));
-		var new_opts = opts with {oppo_delay = new_oppo_delay, speed = new_speed, oppo_speed = new_oppo_speed, ball_delay = new_ball_delay, delay = new_delay};
+		var new_speed = Prompt.Input<int>(o => o.WithMessage("self paddle speed ratio:").WithDefaultValue(opts.speed));
+		var new_oppo_delay = Prompt.Input<int>(o => o.WithMessage("opponent delay:").WithDefaultValue(opts.oppo_delay));
+		var new_oppo_speed = Prompt.Input<int>(o => o.WithMessage("opponent paddle speed ratio:").WithDefaultValue(opts.oppo_speed));
+		var new_oppo_about = Prompt.Input<int>(o => o.WithMessage("opponent aboutness to find ball:").WithDefaultValue(opts.oppo_about));
+		var new_opts = opts with {oppo_delay = new_oppo_delay, speed = new_speed, oppo_speed = new_oppo_speed, ball_delay = new_ball_delay, oppo_about = new_oppo_about};
 		return new_opts;
 	}
 }
