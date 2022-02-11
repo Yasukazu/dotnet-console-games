@@ -14,13 +14,13 @@ public class Game {
 	// public int PaddleWidth {get; init;}
 	public Dictionary<System.ConsoleKey, Func<int>> manipDict = new();	
 	public Rotation rotation {get; init;}
-	TimeSpan delay;
+	TimeSpan delay => TimeSpan.FromMilliseconds(Opts.delay);
 	Stopwatch opponentStopwatch = new();
 	Stopwatch ballStopwatch = new();
 	System.Timers.Timer ballTimer;
 	bool ballIsRunning;
-	TimeSpan opponentInputDelay;
-	TimeSpan ballDelay;
+	TimeSpan opponentInputDelay => TimeSpan.FromMilliseconds(Math.Abs(Math.Round(Opts.oppo_delay / Math.Cos(Ball.Angle)))); 
+	TimeSpan ballDelay => TimeSpan.FromMilliseconds(Math.Round((float)Opts.ball_delay / Ball.Stride));
 	public Points score = new(3, 3);
 	// int[] Points = {3, 3}; // self, opponent
 	Queue<Action> DrawQueue = new();
@@ -51,12 +51,6 @@ public class Game {
 			manipDict[ConsoleKey.LeftArrow] = ()=>{ return selfPadl.Shift(-opt.speed); };
 			manipDict[ConsoleKey.RightArrow] = ()=>{ return selfPadl.Shift(opt.speed); };
 		}
-		delay = TimeSpan.FromMilliseconds(opt.delay);
-		opponentInputDelay = TimeSpan.FromMilliseconds(opt.oppo_delay);
-		// Ball dX dY compensation
-		var ball_stride = Ball.Stride;
-		ballDelay = TimeSpan.FromMilliseconds(Math.Round((float)opt.ball_delay / Ball.Stride));
-	// pdl = new VPaddle(screen.w, paddle_width); // NestedRange(0..(width / 3), 0..width);
 	Console.CancelKeyPress += delegate {
 		Console.Clear();
 		Console.CursorVisible = true;
@@ -117,8 +111,11 @@ public class Game {
 			}
 			opponentStopwatch.Restart();
 		}
-		while (DrawQueue.Count > 0)
-			DrawQueue.Dequeue()();
+		while (DrawQueue.Count > 0){
+			var action = DrawQueue.Dequeue();
+			Debug.Assert(action != null);
+			action();
+		}
 		// Thread.Sleep(delay);
 		using(var task = Task.Delay(delay)) {
 			task.Wait();
