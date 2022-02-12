@@ -71,19 +71,20 @@ public class PaddleScreen : Screen {
 		}
 		return false;
 	}
-	public bool doBall(Queue<Action> drawQueue) {
+	public Offsets doBall(Queue<Action> drawQueue) {
 		var offsets = Ball.offsets;
 		if (Ball.Move()){
 			var new_offsets = Ball.offsets;
+			var diff_offsets = new Offsets(new_offsets.x - offsets.x, new_offsets.y - offsets.y);
 			drawQueue.Enqueue(()=> {
 				SetCursorPosition(offsets.x, offsets.y);
 				Console.Write((char)CharCode.SPC);
 				SetCursorPosition(new_offsets.x, new_offsets.y);
 				Console.Write(Ball.DispChar);
 			});
-			return true;
+			return new Offsets(new_offsets.x - offsets.x, new_offsets.y - offsets.y);
 		}
-		return false;
+		return new Offsets(0, 0);
 	}
 	public void HideBall(Queue<Action> drawQueue) {
 		var offsets = Ball.offsets;
