@@ -19,13 +19,21 @@ public class Game {
 	Stopwatch ballStopwatch = new();
 	System.Timers.Timer ballTimer;
 	bool ballIsRunning;
-	TimeSpan opponentInputDelay => TimeSpan.FromMilliseconds(Math.Abs(Math.Round(Opts.oppo_delay / Math.Cos(Ball.Angle)))); 
+	TimeSpan opponentInputDelay { get{ 
+		var ak = Opts.ball_delay * Math.Cos(Ball.Angle);
+		// var ms = Math.Abs(Math.Round(Opts.oppo_delay / ak));
+		return TimeSpan.FromMilliseconds( Math.Abs(Math.Round(ak)));
+		}
+	}
+
 	TimeSpan ballDelay => TimeSpan.FromMilliseconds(Math.Round((float)Opts.ball_delay / Ball.Stride));
 	public Points score = new(3, 3);
 	// int[] Points = {3, 3}; // self, opponent
 	Queue<Action> DrawQueue = new();
 	int newBallDelay = 800;
 	public Options Opts{get;init;}
+
+	public float BallSpeed => (float)Math.Sqrt(Math.Pow(Ball.dX, 2) + Math.Pow(Ball.dY, 2)) / Opts.ball_delay;
 
 	public Game(Options opt) {
 
@@ -113,8 +121,9 @@ public class Game {
 		}
 		while (DrawQueue.Count > 0){
 			var action = DrawQueue.Dequeue();
-			Debug.Assert(action != null);
-			action();
+			//Debug.Assert(action != null);
+			if(action != null)
+				action();
 		}
 		// Thread.Sleep(delay);
 		using(var task = Task.Delay(delay)) {
@@ -129,8 +138,8 @@ public class Game {
 			// if(!ballIsRunning) return;
             // if(ballStopwatch.IsRunning && ballStopwatch.Elapsed > ballDelay){
             var old_dy = Ball.dY;
-            var isBallMoved = screen.doBall(DrawQueue); // screen.Ball.Move();
-            if (isBallMoved) {
+            var ballMoved = screen.doBall(DrawQueue); // screen.Ball.Move();
+            if (ballMoved.x != 0 || ballMoved.y != 0) {
                 bool doReset = false;
                 var offsets = Ball.offsets;
                 if (old_dy < 0 && offsets.y <= Ball.YOffset.Min) {
