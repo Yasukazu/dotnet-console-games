@@ -54,8 +54,8 @@ public class PaddleScreen : Screen {
 			drawImage(n, image, padl.DispChar);
 		else
 			redrawImage(n, image, padl.DispChar);
-		if(replace_buffer)
-		if(replace_buffer)
+		// TODO: rm if(replace_buffer)
+		// TODO: rm if(replace_buffer)
 		if(replace_buffer)
 			Lines[n] = image;
 	}
