@@ -1,18 +1,27 @@
-public class Tuple2f { 
-    Tuple<float,float> tuple;
-    public Tuple2f(float x, float y) {
-        tuple = new(x, y);
+public class Array2f { 
+    float[] array = new float[2];
+    public Array2f(float x, float y) {
+        array[0] = x;
+        array[1] = y;
     } 
-   public float x {get => tuple.Item1;
+   public float x {get => array[0];
+     set {
+        array[0] = value;
+     }
    } 
-   public float y {get => tuple.Item2;} 
+   public float y {get => array[1]; 
+     set {
+        array[1] = value;
+     }
+}
 
    public void set(float x, float y) {
-     tuple = new(x, y);
+        array[0] = x;
+        array[1] = y;
    }
   }    
 
-  public class Point2f : Tuple2f {
+  public class Point2f : Array2f {
     public Point2f(float item1, float item2) : base(item1, item2) {}
 
     public float distanceSquared(Point2f p1) {
@@ -22,7 +31,7 @@ public class Tuple2f {
     }
   }
 
-  public class Vector2f : Tuple2f {
+  public class Vector2f : Array2f {
     public Vector2f(float item1, float item2) : base(item1, item2) {}
     
     public float dot(Vector2f v1) {
@@ -30,7 +39,7 @@ public class Tuple2f {
     }
 
     public float length() {
-        return (float)Math.Sqrt((double)(this.x * this.x + this.y * this.y));
+        return (float)Math.Sqrt(this.x * this.x + this.y * this.y);
     }
 
     public float lengthSquared() {
@@ -38,7 +47,7 @@ public class Tuple2f {
     }
 
     public void normalize(Vector2f v1) {
-        float norm = (float)(1.0 / Math.Sqrt((double)(v1.x * v1.x + v1.y * v1.y)));
+        float norm = 1.0f / (float)Math.Sqrt(v1.x * v1.x + v1.y * v1.y);
         set(v1.x * norm, v1.y * norm);
     }
 
