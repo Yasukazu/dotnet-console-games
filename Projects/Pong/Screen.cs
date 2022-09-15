@@ -6,7 +6,7 @@ using System.Diagnostics;
 enum DrawDirection {Normal, Rotating}
 public enum CharCode {ESC = '\x1b', SPC = '\x20', VBAR = '|', HBAR = '-', DOT = '.'}
 public record struct Dimention ( int x, int y);
-public class Screen : OnScreen {
+public class Screen {
 	public Dictionary<System.ConsoleKey, Func<int>> KeyManipDict;
 	public const char BlankChar = (char)CharCode.SPC;
 	public Action<int, BitArray, char> DrawImage;
@@ -44,10 +44,6 @@ public class Screen : OnScreen {
         : (line, buff, c) =>
             HPutCasBitArray(line, c, buff);
 
-	}
-
-	public Screen() {
-		(w, h) = OnScreen.init();
 	}
 
 	public BitArray [] new_buffer() {
