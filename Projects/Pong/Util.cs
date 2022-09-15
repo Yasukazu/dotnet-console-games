@@ -23,10 +23,10 @@ public class Player {
 
 public record Dim2(int W, int H);
 public record Cood2(int X, int Y);
-interface OnScreen {
+public interface OnScreen {
 	public static Cood2 dim;
 
-	static (int, int) init(int x = 0, int y = 0) {
+	public static (int, int) init(int x = 0, int y = 0) {
 		var W = Console.WindowWidth;
 		var H = Console.WindowHeight;
 		(int _x, int _y) = (x > 0 ? x : W, y > 0 ? y : H);
@@ -35,6 +35,7 @@ interface OnScreen {
 		return (dim.X, dim.Y);
 	}
 }
+
 public enum ScreenChar {O = '\u25CB',
  C = ' ', 
  B = '\u25A0', // Black square
