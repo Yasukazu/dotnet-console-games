@@ -25,7 +25,7 @@ public record Options {
 
 	[Option('l', "load-from-XML", Required =false, HelpText = "Load options from XML file name. default ''.")]
 	public string load_from_xml {get; set;} = "";
-	[Option('b', "opponent about", Required =false, HelpText = "opponent about at find difference. default 1")]
+	[Option('t', "opponent about", Required =false, HelpText = "opponent about at find difference. default 1")]
 	public int oppo_about {get; set;} = 1;
 	public static string XmlName = @"options.xml";
     public void SaveXML() {
