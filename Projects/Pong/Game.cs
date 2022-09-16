@@ -2,8 +2,7 @@
 using System.Timers;
 using System.Threading;
 using System.Threading.Tasks;
-#nullable enable
-
+namespace pong;
 public class Game {
 	public Ball Ball;
 	public PaddleScreen screen;
@@ -18,7 +17,7 @@ public class Game {
 	Stopwatch opponentStopwatch = new();
 	Stopwatch ballStopwatch = new();
 	System.Timers.Timer ballTimer;
-	bool ballIsRunning;
+	// bool ballIsRunning;
 	TimeSpan opponentInputDelay { get{ 
 		var ak = Opts.ball_delay * Math.Cos(Ball.Angle);
 		// var ms = Math.Abs(Math.Round(Opts.oppo_delay / ak));

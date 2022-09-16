@@ -1,5 +1,4 @@
-﻿
-﻿global using System;
+﻿﻿global using System;
 global using System.Linq;
 global using System.Collections;
 global using System.Collections.Generic;
@@ -9,9 +8,7 @@ global using System.Threading.Tasks;
 global using System.IO;
 using Sharprompt;
 using Sharprompt.Fluent;
-
-#nullable enable
-
+using pong;
 // ConsoleTraceListener myWriter = new GonsoleTraceListener();
 // Trace.Listeners.Add(myWriter);
 // Debug.Write("myWriter is added to Trace.Listeners.  OOProgram start.");
@@ -139,4 +136,3 @@ if(modified || opt.save_to_xml != ""){
     }
 }
 Console.CursorVisible = true;
-

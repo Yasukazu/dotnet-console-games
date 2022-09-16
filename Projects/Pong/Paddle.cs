@@ -1,8 +1,5 @@
-using System;
-using System.Linq;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
+namespace pong;
+
 public class OpponentPaddle : Paddle {
 
 	override public PaddleSide Side {get{return PaddleSide.Away;}}

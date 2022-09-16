@@ -1,4 +1,4 @@
-
+namespace pong;
 public record Options {
 	[Option('r', "rotation", Required =false, HelpText = "rotation default 0(not rotated) and others are 90(, 180 and 270).")]
 	public int rotation { get; set;} = 0;
@@ -34,11 +34,13 @@ public record Options {
             serializer.Serialize(writer, this);
         }
     }
-	public static Options LoadXML(string load_from_xml) {
+	public static Options? LoadXML(string load_from_xml) {
         System.Xml.Serialization.XmlSerializer serializer = new (typeof(Options));
-		Options opt;
+		Options? opt = null;
         using(System.IO.StreamReader reader = new(load_from_xml)){
-			opt = (Options)serializer.Deserialize(reader);
+			var obj = serializer.Deserialize(reader);
+			if (obj != null)
+				opt = (Options)obj;
         }
 		return opt;
     }
