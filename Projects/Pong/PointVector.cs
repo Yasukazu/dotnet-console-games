@@ -5,19 +5,24 @@ public class Array2f {
         array[1] = y;
     } 
    public float x {get => array[0];
-     set {
+     protected set {
         array[0] = value;
      }
    } 
    public float y {get => array[1]; 
-     set {
+     protected set {
         array[1] = value;
      }
 }
 
-   public void set(float x, float y) {
+   protected void set(float x, float y) {
         array[0] = x;
         array[1] = y;
+   }
+
+   public void add(float x, float y) {
+    this.x += x;
+    this.y += y;
    }
   }    
 
