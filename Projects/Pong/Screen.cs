@@ -8,11 +8,17 @@ public record Cood2(int X, int Y);
 public interface OnScreen {
 	public static Cood2 dim = new(0, 0);
 
-	public static (int, int) init(int x = 0, int y = 0) {
+	public static (int, int) init(int x = 0, int y = 0, int align = 8) {
+		if (x < 0 || y < 0) {
+			throw new ArgumentException("Both args must not be minus.");
+		}
 		var W = Console.WindowWidth;
 		var H = Console.WindowHeight;
-		(int _x, int _y) = (x > 0 ? x : W, y > 0 ? y : H);
-		(int mx, int my) = (_x % 8, _y % 8);
+		if (W == 0 || H == 0) {
+			throw new InsufficientMemoryException("Console area is zero.");
+		}
+		(int _x, int _y) = (x > 0 ? Math.Min(x, W) : W, y > 0 ? Math.Min(y, H) : H);
+		(int mx, int my) = (_x % align, _y % align);
 		dim = new(_x - mx, _y - my);
 		return (dim.X, dim.Y);
 	}
