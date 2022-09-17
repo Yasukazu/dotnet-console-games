@@ -25,34 +25,47 @@ b2.speedUp(0.1f, -2.4f);
 Debug.Print($"Ball2={b2.ToString()}");
 
 public class VirtualScreen {
-    RectangleF window;
-    pong.Screen screen;
+  RectangleF window;
+  pong.Screen screen;
 
-    public RectangleF Window { get => window;}
-  int _w;
-  int _h;
+  public RectangleF Window { get => window;}
+  readonly int _w; // width
+  readonly int _h; // height
+  enum ScreenItem {
+    None, Wall, Ball, Paddle
+  }
+  BitArray[] BitImage;
+
   public float Width {
     get => window.Width;
   }
   public float Height {
     get => window.Height;
   }
-  public VirtualScreen () {
-    (_w, _h) = pong.OnScreen.init();
-    screen = new Screen(_w, _h);
-    window = new RectangleF(new PointF(0, 0), new SizeF(_w, _h));
-  }
 
-  public VirtualScreen (int width, int height) {
-    (_w, _h) = pong.OnScreen.init();
+  public VirtualScreen (int width = 0, int height = 0) {
+    (_w, _h) = pong.OnScreen.init(width, height);
+    if (_w < 4) {
+      throw new ApplicationException("Screen width is not enough.");
+    }
+    if (_h < 4) {
+      throw new ApplicationException("Screen height is not enough.");
+    }
     _w = Math.Min(_w, width);
     _h = Math.Min(_h, height);
     screen = new Screen(_w, _h);
     window = new RectangleF(new PointF(0, 0), new SizeF(_w, _h));
+    BitImage = new BitArray[_h];
+    for (int i = 0; i < _h; ++i) {
+      BitImage[i] = new BitArray(_w);
+    }
   }
 
-  public static Char WallChar = '|';
+  public readonly Char WallChar = '|';
   public void DrawWalls() { 
+    for (int i = 0; i < Height; ++i) {
+      BitImage[i][0] = BitImage[i][_w - 1] = true;
+    }
     Char[] cc = new Char[_w];
     Array.Fill(cc, ' ');
     cc[0] = cc[_w - 1] = WallChar;
