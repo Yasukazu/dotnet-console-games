@@ -1,6 +1,6 @@
 namespace pong;
 public record BallSpec(Range xrange, Range yrange, Rotation rot);
-public class PaddleScreen : Screen {
+public class Screen : Screen {
 	public BallSpec BallSpec => new BallSpec(1..SideToSide, 1..HomeToAway, isRotated ? Rotation.Vertical : Rotation.Horizontal);
 	public int HomeToAway {get{
 		return isRotated ? w - 1 : h - 1;
@@ -31,11 +31,14 @@ public class PaddleScreen : Screen {
 	public Ball Ball;
 	public Paddle[] Paddles = new Paddle[2];
 	List<ScreenDrawItem> DrawItems = new();
-	public PaddleScreen(int x, int y, bool rotate) : base(x,y,rotate) {
+	public Screen(int x, int y, bool rotate) : base(x,y,rotate) {
 		AwayLineNum = this.EndOfLines; // Lines.Length - 1;
 		// for (int i = 0; i < Walls.Length; ++i) Walls[i] = new Wall(1..EndOfLines);
 		// WallLocations = {0, EndOfLines - 1};
+		if (EndOfLines > 1)
 		SideWalls[0] = new SideWall(WallSide.Left, new Wall(1..EndOfLines));
+		else
+		  throw new ArgumentOutOfRangeException("EndOfLines must be more than 1.");
 		SideWalls[1] = new SideWall(WallSide.Right, new Wall(1..EndOfLines));
 		Ball = new(0..SideToSide, 0..HomeToAway, 0);
 	}
