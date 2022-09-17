@@ -13,3 +13,8 @@
   ``` csharp
   namespace pong;
   ```
+
+   - Debug by Visual Studio Code:.vscode/launch.json
+  ``` json
+     "console": "integratedTerminal",
+  ```

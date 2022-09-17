@@ -6,36 +6,60 @@ global using System.Collections.Generic;
 global using System.Diagnostics;
 global using System.Threading.Tasks;
 global using System.IO;
+global using System.Drawing;
 
 using ping;
 using pong;
 
 int w, h;
+Console.Clear();
 (w, h) = pong.OnScreen.init();
-Ball2 b2 = new ();
+var vScreen0 = new VirtualScreen();
+var vScreen = new VirtualScreen(80, 16);
+vScreen.DrawWalls();
+var screen = new pong.Screen(80, 16, false);
+BallO b2 = new ();
 Debug.Print($"Ball2={b2.ToString()}");
 b2.moveBy(1.1f, 2.3f);
 b2.speedUp(0.1f, -2.4f);
 Debug.Print($"Ball2={b2.ToString()}");
 
-    public class Ball2 {
-        Point2f point = new Point2f(0, 0);
-        Vector2f speed = new Vector2f(0, 0);
-        public void moveBy(float dx, float dy) {
-            this.point.add(dx, dy);
-        }
-        public void speedUp(float dx, float dy) {
-            this.speed.add(dx, dy);
-        }
-        public void invertX() {
-            var dx = this.speed.x;
-            this.speed.add(-dx-dx, 0);
-        }
-        public void invertY() {
-            var d = this.speed.y;
-            this.speed.add(0, -d-d);
-        }
-        override public string ToString() {
-            return $"point=({point.x}, {point.y}), speed=({speed.x}, {speed.y}).";
-        }
+public class VirtualScreen {
+    RectangleF window;
+    pong.Screen screen;
+
+    public RectangleF Window { get => window;}
+  int _w;
+  int _h;
+  public float Width {
+    get => window.Width;
+  }
+  public float Height {
+    get => window.Height;
+  }
+  public VirtualScreen () {
+    (_w, _h) = pong.OnScreen.init();
+    screen = new Screen(_w, _h);
+    window = new RectangleF(new PointF(0, 0), new SizeF(_w, _h));
+  }
+
+  public VirtualScreen (int width, int height) {
+    (_w, _h) = pong.OnScreen.init();
+    _w = Math.Min(_w, width);
+    _h = Math.Min(_h, height);
+    screen = new Screen(_w, _h);
+    window = new RectangleF(new PointF(0, 0), new SizeF(_w, _h));
+  }
+
+  public static Char WallChar = '|';
+  public void DrawWalls() { 
+    Char[] cc = new Char[_w];
+    Array.Fill(cc, ' ');
+    cc[0] = cc[_w - 1] = WallChar;
+    var s = new string(cc);
+    for (int n = 0; n < _h; ++n) {
+      Console.SetCursorPosition(0, n);
+      Console.Write(s);
     }
+  }
+}
