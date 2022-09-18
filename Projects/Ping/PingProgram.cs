@@ -14,15 +14,14 @@ using pong;
 int w, h;
 Console.Clear();
 (w, h) = pong.OnScreen.init();
-var vScreen0 = new VirtualScreen();
-var vScreen = new VirtualScreen(80, 16);
-vScreen.DrawWalls();
-var screen = new pong.Screen(80, 16, false);
-BallO b2 = new ();
-Debug.Print($"Ball2={b2.ToString()}");
-b2.moveBy(1.1f, 2.3f);
-b2.speedUp(0.1f, -2.4f);
-Debug.Print($"Ball2={b2.ToString()}");
+BallO ball = new ();
+var screen = new VirtualScreen(ball);
+screen.DrawWalls();
+ball.moveTo(screen.Width / 2, screen.Height / 2);
+Debug.Print($"Ball2={ball.ToString()}");
+ball.moveBy(1.1f, 2.3f);
+ball.speedUp(0.1f, -2.4f);
+Debug.Print($"Ball2={ball.ToString()}");
 
 public class VirtualScreen {
   RectangleF window;
@@ -42,8 +41,10 @@ public class VirtualScreen {
   public float Height {
     get => window.Height;
   }
-
-  public VirtualScreen (int width = 0, int height = 0) {
+  PointF lastBallPos = new();
+  BallO ball;
+  public VirtualScreen (BallO ball, int width = 0, int height = 0) {
+    this.ball = ball;
     (_w, _h) = pong.OnScreen.init(width, height);
     if (_w < 4) {
       throw new ApplicationException("Screen width is not enough.");
@@ -61,7 +62,38 @@ public class VirtualScreen {
     }
   }
 
+  public void draw() {
+    Char[] cc = new Char[_w];
+
+    for (int i = 0; i < _h; ++i) {
+      Array.Fill(cc, ' ');
+      if (i == 0 || i == _h - 1) {
+        //TODO: Paddle draw
+      }
+      else {
+        cc[0] = cc[_w - 1] = WallChar;
+        BitArray bb = (BitArray)BitImage[i].Clone();
+        bb[0] = bb[_w - 1] = false;
+        var anyTrue = false;
+        for(int j = 0; j < bb.Length; ++j) {
+          if (bb[j] == true) {
+            anyTrue = true;
+            break;
+          }
+        }
+        if (anyTrue) {
+
+        }
+
+
+      }
+    }
+  }
+
+  public readonly Char SpaceChar = ' ';
   public readonly Char WallChar = '|';
+  public readonly Char PaddleChar = '+';
+  public readonly Char BallChar = 'O';
   public void DrawWalls() { 
     for (int i = 0; i < Height; ++i) {
       BitImage[i][0] = BitImage[i][_w - 1] = true;
