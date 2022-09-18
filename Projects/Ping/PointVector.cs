@@ -17,7 +17,7 @@ public class Array2f {
      }
 }
 
-   protected void set(float x, float y) {
+   public void set(float x, float y) {
         array[0] = x;
         array[1] = y;
    }
