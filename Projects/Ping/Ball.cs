@@ -1,35 +1,43 @@
 namespace ping;
 public class BallO {
-    Point2f point = new Point2f(0, 0);
-    Vector2f speed = new Vector2f(0, 0);
-    public float x {get => point.x;}
-    public float y {get => point.y;}
-    public float dx {get => speed.x;}
-    public float dy {get => speed.y;}
+    PointF point;
+    System.Numerics.Vector2 speed = new (0, 0);
+    public float x {get => point.X;}
+    public float y {get => point.Y;}
+    public float dx {get => speed.X;}
+    public float dy {get => speed.Y;}
+    public PointF getPoint() => point;
+
+    public BallO() {
+      point = new (0, 0);
+    }
+    
     public void step(object sender, System.EventArgs e) {
         Debug.Print("BallO.step();");
-        point.add(dx, dy);
+        point.X += dx; // .add(dx, dy);
+        point.Y += dy;
     }
     public (float, float) moveBy(float dx, float dy) {
-        this.point.add(dx, dy);
+        point.X += dx; // .add(dx, dy);
+        point.Y += dy;
         return (dx, dy);
     }
     public (float, float) moveTo(float dx, float dy) {
-        this.point.set(dx, dy);
+        point.X = dx; // .add(dx, dy);
+        point.Y = dy;
         return (dx, dy);
     }
     public void speedUp(float dx, float dy) {
-        this.speed.add(dx, dy);
+        speed.X += dx; //.add(dx, dy);
+        speed.Y += dy;
     }
     public void invertX() {
-        var dx = this.speed.x;
-        this.speed.add(-dx-dx, 0);
+        speed.X = -speed.X;
     }
     public void invertY() {
-        var d = this.speed.y;
-        this.speed.add(0, -d-d);
+        speed.Y = -speed.Y;
     }
     override public string ToString() {
-        return $"point=({point.x}, {point.y}), speed=({speed.x}, {speed.y}).";
+        return $"point=({point.X}, {point.Y}), speed=({speed.X}, {speed.Y}).";
     }
 }

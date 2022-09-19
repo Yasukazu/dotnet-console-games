@@ -46,7 +46,7 @@ public class VirtualScreen {
   enum ScreenItem {
     None, Wall, Ball, Paddle
   }
-  BitArray[] BitImage;
+  BitArray[] bitImage;
 
   public float Width {
     get => window.Width;
@@ -54,7 +54,7 @@ public class VirtualScreen {
   public float Height {
     get => window.Height;
   }
-  Point2f lastBallPos;
+  PointF lastBallPos;
   BallO ball;
 
   IntervalEvent intervalEvent {get; init;}
@@ -72,9 +72,9 @@ public class VirtualScreen {
     ball.moveTo(screen.dim.x / 2, screen.dim.y / 2);
     lastBallPos = new(ball.x, ball.y);
     window = new RectangleF(new PointF(0, 0), new SizeF(_w, _h));
-    BitImage = new BitArray[_h];
+    bitImage = new BitArray[_h];
     for (int i = 0; i < _h; ++i) {
-      BitImage[i] = new BitArray(_w);
+      bitImage[i] = new BitArray(_w);
     }
     this.intervalEvent = intervalEvent;
     intervalEvent.Step += new EventHandler(ball.step);
@@ -83,9 +83,32 @@ public class VirtualScreen {
 
   void step(object sender, System.EventArgs e) {
     Debug.Print("VirtualScreen.step();");
-    draw();
-    lastBallPos.set(ball.x, ball.y);
+    if (lastBallPos != ball.getPoint()) {
+      // clear old ball image
+      var oldLine = (int)Math.Round(ball.y);
+      var bb = bitImage[oldLine];
+      for(int i = 0; i < bb.Length; ++i) {
+        bb[i] = false;
+      }
+      clearLine(oldLine);
+      draw();
+      lastBallPos = new(ball.x, ball.y);
+    }
   }
+
+  void drawLine() {
+    // TODO:
+  }
+
+  void clearLine(int n) {
+    Console.SetCursorPosition(0, n);
+    var cc = new Char[_w];
+    Array.Fill(cc, ' ');
+    cc[0] = cc[_w - 1] = WallChar;
+    Console.Write(new string(cc));
+  }
+
+
 
   public void SetBallPos(float x, float y) {
     // TODO: BitImage
@@ -98,7 +121,7 @@ public class VirtualScreen {
     //TODO: PlayerPaddle draw
     //TODO: EnemyPaddle draw
     for (int i = 0; i < _h; ++i) {
-        BitArray bb = (BitArray)BitImage[i].Clone();
+        BitArray bb = (BitArray)bitImage[i].Clone();
         bb[0] = bb[_w - 1] = false;
         int anyTrue = 0;
         int j = 0;
@@ -125,7 +148,7 @@ public class VirtualScreen {
   public readonly Char BallChar = 'O';
   public void DrawWalls() { 
     for (int i = 0; i < Height; ++i) {
-      BitImage[i][0] = BitImage[i][_w - 1] = true;
+      bitImage[i][0] = bitImage[i][_w - 1] = true;
     }
     Char[] cc = new Char[_w];
     Array.Fill(cc, ' ');
