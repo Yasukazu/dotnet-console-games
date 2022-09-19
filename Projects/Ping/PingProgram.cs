@@ -4,7 +4,7 @@ global using System;
 global using System.Collections;
 global using System.Collections.Generic;
 global using System.Diagnostics;
-global using System.Threading.Tasks;
+// global using System.Threading.Tasks;
 global using System.Drawing;
 
 using ping;
@@ -13,17 +13,29 @@ using pong;
 // int w, h;
 // (w, h) = pong.OnScreen.init();
 Console.Clear();
+IntervalEvent intervalEvent = new();
 BallO ball = new ();
-var screen = new VirtualScreen();
-screen.DrawWalls();
-ball.moveTo(screen.Width / 2, screen.Height / 2);
+ball.speedUp(13.5f, -24.4f);
+var screen = new VirtualScreen(intervalEvent, ball);
 screen.draw();
-Debug.Print($"Ball2={ball.ToString()}");
+intervalEvent.step();
+// screen.BallMoveTo(ball.moveTo(screen.Width / 2, screen.Height / 2));
+screen.draw();
+// Debug.Print($"Ball2={ball.ToString()}");
 ball.moveBy(1.1f, 2.3f);
 screen.draw();
-ball.speedUp(0.1f, -2.4f);
-Debug.Print($"Ball2={ball.ToString()}");
-
+// Debug.Print($"Ball2={ball.ToString()}");
+namespace ping {
+public record struct Dim2f(float x, float y);
+public class IntervalEvent {
+  /// Event handler
+  public event EventHandler Step = delegate {};
+  public void step() {
+    if (Step != null) {
+      Step(this, EventArgs.Empty);
+    }
+  }
+}
 public class VirtualScreen {
   RectangleF window;
   pong.Screen screen;
@@ -42,10 +54,13 @@ public class VirtualScreen {
   public float Height {
     get => window.Height;
   }
-  PointF lastBallPos = new();
+  Point2f lastBallPos;
   BallO ball;
-  public VirtualScreen (int width = 0, int height = 0) {
-    ball = new BallO();
+
+  IntervalEvent intervalEvent {get; init;}
+
+  public VirtualScreen (IntervalEvent intervalEvent, BallO ball, int width = 0, int height = 0) {
+    this.ball = ball;
     (_w, _h) = pong.OnScreen.init(width, height);
     if (_w < 4) {
       throw new ApplicationException("Screen width is not enough.");
@@ -54,16 +69,26 @@ public class VirtualScreen {
       throw new ApplicationException("Screen height is not enough.");
     }
     screen = new Screen(_w, _h);
+    ball.moveTo(screen.dim.x / 2, screen.dim.y / 2);
+    lastBallPos = new(ball.x, ball.y);
     window = new RectangleF(new PointF(0, 0), new SizeF(_w, _h));
     BitImage = new BitArray[_h];
     for (int i = 0; i < _h; ++i) {
       BitImage[i] = new BitArray(_w);
     }
+    this.intervalEvent = intervalEvent;
+    intervalEvent.Step += new EventHandler(ball.step);
+    intervalEvent.Step += new EventHandler(step);
   }
 
-  public void MoveBallTo(float x, float y) {
+  void step(object sender, System.EventArgs e) {
+    Debug.Print("VirtualScreen.step();");
+    draw();
+    lastBallPos.set(ball.x, ball.y);
+  }
+
+  public void SetBallPos(float x, float y) {
     // TODO: BitImage
-    ball.moveTo(x, y);
 
   }
 
@@ -111,4 +136,5 @@ public class VirtualScreen {
       Console.Write(s);
     }
   }
+}
 }
