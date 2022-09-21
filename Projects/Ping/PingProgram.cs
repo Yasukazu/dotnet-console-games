@@ -9,7 +9,11 @@ global using System.Drawing;
 
 using ping;
 using pong;
+using sample;
 
+// start main
+var smp = new EventSample();
+smp.Run();
 // int w, h;
 // (w, h) = pong.OnScreen.init();
 Console.Clear();
@@ -37,22 +41,21 @@ public class IntervalEvent {
   }
 }
 public class VirtualScreen {
-  RectangleF window;
   pong.Screen screen;
 
-  public RectangleF Window { get => window;}
+  public RectangleF Window { get => border;}
   readonly int _w; // width
   readonly int _h; // height
   enum ScreenItem {
     None, Wall, Ball, Paddle
   }
-  BitArray[] bitImage;
+  public BitArray[] BitImage {get; init;}
 
   public float Width {
-    get => window.Width;
+    get => _w;
   }
   public float Height {
-    get => window.Height;
+    get => _h;
   }
   PointF lastBallPos;
   BallO ball;
@@ -71,22 +74,26 @@ public class VirtualScreen {
     screen = new Screen(_w, _h);
     ball.moveTo(screen.dim.x / 2, screen.dim.y / 2);
     lastBallPos = new(ball.x, ball.y);
-    window = new RectangleF(new PointF(0, 0), new SizeF(_w, _h));
-    bitImage = new BitArray[_h];
+    BitImage = new BitArray[_h]; 
     for (int i = 0; i < _h; ++i) {
-      bitImage[i] = new BitArray(_w);
+      BitImage[i] = new BitArray(_w);
     }
     this.intervalEvent = intervalEvent;
-    intervalEvent.Step += new EventHandler(ball.step);
-    intervalEvent.Step += new EventHandler(step);
+    // intervalEvent.Step += new EventHandler(ball.step);
+    intervalEvent.Step += step;
   }
 
-  void step(object sender, System.EventArgs e) {
+  void step(object? sender, System.EventArgs e) {
     Debug.Print("VirtualScreen.step();");
+    var ballPos = ball.step();
+    var ballXi = (int)Math.Round(ballPos.X);
+    if (ballXi <= 0 || ballXi >= BitImage[0].Length - 1) {
+
+    }
     if (lastBallPos != ball.getPoint()) {
       // clear old ball image
       var oldLine = (int)Math.Round(ball.y);
-      var bb = bitImage[oldLine];
+      var bb = BitImage[oldLine];
       for(int i = 0; i < bb.Length; ++i) {
         bb[i] = false;
       }
@@ -121,7 +128,7 @@ public class VirtualScreen {
     //TODO: PlayerPaddle draw
     //TODO: EnemyPaddle draw
     for (int i = 0; i < _h; ++i) {
-        BitArray bb = (BitArray)bitImage[i].Clone();
+        BitArray bb = (BitArray)BitImage[i].Clone();
         bb[0] = bb[_w - 1] = false;
         int anyTrue = 0;
         int j = 0;
@@ -148,7 +155,7 @@ public class VirtualScreen {
   public readonly Char BallChar = 'O';
   public void DrawWalls() { 
     for (int i = 0; i < Height; ++i) {
-      bitImage[i][0] = bitImage[i][_w - 1] = true;
+      BitImage[i][0] = BitImage[i][_w - 1] = true;
     }
     Char[] cc = new Char[_w];
     Array.Fill(cc, ' ');
@@ -160,4 +167,21 @@ public class VirtualScreen {
     }
   }
 }
+
+public class Border {
+  public RectangleF area {get; init;}
+
+  public Border(PointF point, SizeF size) {
+    area = new RectangleF(point, size);
+  }
+    /// check the ball is inside the border  
+  bool ballIsInsideBorder() {
+    if (ball.x >= )
+  }
+
+
+
+
+}
+
 }
