@@ -11,9 +11,15 @@ public class BallO {
     public BallO() {
       point = new (0, 0);
     }
-    
-    public void step(object sender, System.EventArgs e) {
+       
+    public PointF step() {
         Debug.Print("BallO.step();");
+        point.X += dx;
+        point.Y += dy;
+        return point;
+    } 
+    public void step(object sender, System.EventArgs e) {
+        Debug.Print("BallO.step(object, EventArgs);");
         point.X += dx; // .add(dx, dy);
         point.Y += dy;
     }
