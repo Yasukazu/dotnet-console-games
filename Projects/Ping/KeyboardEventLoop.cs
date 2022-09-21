@@ -19,7 +19,7 @@ class KeyboardEventLoop
     public KeyboardEventLoop() { }
     public KeyboardEventLoop(KeyboadEventHandler onKeyDown)
     {
-        OnKeyDown += onKeyDown;
+        this.OnKeyDown += onKeyDown;
     }
 
     /// <summary>
