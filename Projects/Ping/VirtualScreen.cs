@@ -67,6 +67,8 @@ public class VirtualScreen {
     }
   }
 
+
+
   void drawLine() {
     // TODO:
   }
@@ -132,21 +134,31 @@ public class VirtualScreen {
   }
 }
 
+enum BorderOut {
+    None, Top, Bottom, Left, Right
+}
+
+/// <summary>
+/// Check ball out of border 
+/// </summary>
 public class Border {
-  public RectangleF area {get; init;}
+  RectangleF area {get; init;}
 
   public Border(PointF point, SizeF size) {
     area = new RectangleF(point + new SizeF(1, 1), size - new SizeF(2, 2));
   }
     /// check the ball is inside the border  
-  bool IsInside(BallO ball) {
-    if (ball.x >= area.Left && ball.x < area.Right &&
-        ball.y >= area.Top && ball.y < area.Bottom) {
-            return true;
-        }
-    else {
-        return false;
-    }
+  BorderOut IsOutside(BallO ball) {
+    if (ball.x < area.Left)
+      return BorderOut.Left;
+    else if (ball.x > area.Right)
+      return BorderOut.Right;
+    else if (ball.y < area.Top)
+      return BorderOut.Top;
+    else if (ball.y > area.Bottom)
+      return BorderOut.Bottom;
+    else
+      return BorderOut.None;
   }
 
 }

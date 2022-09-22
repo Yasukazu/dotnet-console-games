@@ -1,0 +1,5 @@
+namespace ping;
+
+class Runner {
+
+}
