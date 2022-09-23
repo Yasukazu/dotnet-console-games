@@ -1,3 +1,10 @@
+  ## State machine by Automatonymous
+  ``` XML
+  <ItemGroup>
+      <PackageReference Include="Automatonymous" Version="5.1.3" />
+  </ItemGroup>
+  ```
+
   ## How to include/import a closs of other project.
    - in *Projectname*.csproj:
   ``` XML
@@ -18,3 +25,4 @@
   ``` json
      "console": "integratedTerminal",
   ```
+
