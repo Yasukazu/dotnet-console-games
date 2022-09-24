@@ -1,5 +1,5 @@
-namespace ping;
 using Automatonymous;
+namespace ping;
 
 ///  <summary>
 /// State machine for game state
@@ -8,8 +8,8 @@ using Automatonymous;
 /// https://tech-blog.cloud-config.jp/2019-10-28-statemachine-automatonymous/
 /// https://www3.ntu.edu.sg/home/ehchua/programming/java/J8d_Game_Framework.html
 /// /// </reference>
-public enum State {
-   INITIALIZED, READY, PLAYING, PAUSE, GAMEOVER, DESTROYED
+public enum StateEnum {
+   PREINIT, STANDBY, LOOP, HALT, OVER, DESTROYED
 }
 /*
     initGame(): Perform one-time initialization tasks, such as constructing object, opening files, setup timers and key/mouse event handlers.
@@ -67,42 +67,47 @@ public interface StateTransition {
    void destroyGame() { }
 }
 /// state machine class
-class StateClass
+class GameState
 {
     /// <summary>
     /// keeps current state
     /// </summary>
     /// <value></value>
-    public State CurrentState { get; set; }
+    public State? CurrentState { get; set; }
 }
 
 class StateMachineBehavior : AutomatonymousStateMachine<StateClass>
 {
-    public State Initialized {get; private set;}
-    public State Ready {get; private set;}
-    public State Playing {get; private set;}
-    public State Pause {get; private set;}
-    public State Gameover {get; private set;}
+    public State? Initialized {get; private set;}
+    public State? Ready {get; private set;}
+    public State? Playing {get; private set;}
+    public State? Pause {get; private set;}
+    public State? Gameover {get; private set;}
     public Event InitializedToReady {get; private set;}
     public Event ReadyToPlaying {get; private set;}
     public Event PlayingToPause {get; private set;}
     public Event PauseToPlaying {get; private set;}
     public Event PlayingToReady {get; private set;}
     public Event PauseToGameover {get; private set;}
-    public Event ToInitialized {get; private set;}
+    public Event ToInitialized{get; private set;}
     public StateMachineBehavior() {
       /// action when initial state
       Initially(
-         When(ToInitialized)
-         .Then(context =>
-         initialize()).TransitionTo(Initialized);
-         )
-      )
+         When(ToInitialized).Then(context =>
+         initialize()).TransitionTo(Initialized)
+      );
+      During(Initialized,
+        When(InitializedToReady).Then(context =>
+        readynize())
+      );
     }
    
    public void initialize() {
       Debug.Print("To Initialized from initial state.");
 
+   }
+   public void readynize() {
+      Debug.Print("readynize");
    }
 }
 
